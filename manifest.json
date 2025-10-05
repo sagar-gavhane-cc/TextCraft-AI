@@ -7,6 +7,9 @@
     "storage",
     "clipboardWrite"
   ],
+  "host_permissions": [
+    "http://localhost:*/"
+  ],
   "action": {
     "default_popup": "src/popup/popup.html",
     "default_icon": {

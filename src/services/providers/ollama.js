@@ -24,26 +24,40 @@ export class OllamaProvider {
   async rephrase(text, mode, tone) {
     const prompt = buildPrompt(text, mode, tone);
     
-    const response = await fetch(`${this.baseUrl}/api/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: this.model,
-        prompt: prompt,
-        stream: false,
-        options: {
-          temperature: 0.7,
-          num_predict: 2000
-        }
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Ollama error: ${response.status}`);
+    try {
+      console.log(`Sending request to Ollama at ${this.baseUrl}`);
+      const response = await fetch(`${this.baseUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        body: JSON.stringify({
+          model: this.model,
+          prompt: prompt,
+          stream: false,
+          options: {
+            temperature: 0.7,
+            num_predict: 2000
+          }
+        })
+      });
+      
+      if (!response.ok) {
+        console.error(`Ollama error: ${response.status} - ${response.statusText}`);
+        throw new Error(`Ollama error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.response.trim();
+    } catch (error) {
+      console.error('Ollama rephrase error:', error);
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        throw new Error('Cannot connect to Ollama. Make sure Ollama is running locally and accessible.');
+      }
+      throw error;
     }
-    
-    const data = await response.json();
-    return data.response.trim();
   }
 
   /**
@@ -57,12 +71,18 @@ export class OllamaProvider {
       
       const response = await fetch(`${this.baseUrl}/api/tags`, {
         method: 'GET',
-        signal: controller.signal
+        signal: controller.signal,
+        mode: 'cors',
+        headers: {
+          'Accept': 'application/json'
+        }
       });
       
       clearTimeout(timeoutId);
+      console.log('Ollama availability check:', response.status, response.statusText);
       return response.ok;
-    } catch {
+    } catch (error) {
+      console.error('Ollama availability check error:', error);
       return false;
     }
   }
@@ -73,15 +93,24 @@ export class OllamaProvider {
    */
   async listModels() {
     try {
-      const response = await fetch(`${this.baseUrl}/api/tags`);
+      const response = await fetch(`${this.baseUrl}/api/tags`, {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
       
       if (!response.ok) {
+        console.error('Failed to fetch Ollama models:', response.status, response.statusText);
         return [];
       }
       
       const data = await response.json();
+      console.log('Ollama models:', data);
       return data.models ? data.models.map(m => m.name) : [];
-    } catch {
+    } catch (error) {
+      console.error('Error listing Ollama models:', error);
       return [];
     }
   }

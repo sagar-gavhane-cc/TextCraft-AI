@@ -109,11 +109,8 @@ class RephraseApp {
       availableProviders.push({ value: AIProvider.GROQ, label: 'Groq' });
     }
     
-    // Check Ollama
-    const ollamaAvailable = await this.aiService.checkOllamaAvailability();
-    if (ollamaAvailable) {
-      availableProviders.push({ value: AIProvider.OLLAMA, label: 'Ollama (Local)' });
-    }
+    // Always add Ollama as an option regardless of availability
+    availableProviders.push({ value: AIProvider.OLLAMA, label: 'Ollama Local' });
     
     // Populate provider select
     this.elements.providerSelect.innerHTML = '';

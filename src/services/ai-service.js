@@ -150,13 +150,19 @@ export class AIService {
       const timeoutId = setTimeout(() => controller.abort(), 2000);
       
       const response = await fetch(`${ollamaUrl}/api/tags`, {
-        signal: controller.signal
+        signal: controller.signal,
+        mode: 'cors',
+        headers: {
+          'Accept': 'application/json'
+        }
       });
       
       clearTimeout(timeoutId);
+      console.log('Ollama check response:', response.status);
       return response.ok;
       
     } catch (error) {
+      console.error('Ollama availability check error:', error.message);
       return false;
     }
   }

@@ -16,7 +16,7 @@ This document outlines the technical specifications for developing a lightweight
 - **Simplified Tones**: Removed Creative, Academic, and Formal (keeping only Professional, Casual, Friendly, and Direct)
 - **Simplified UI**: Smart defaults, minimal configuration required
 - **Storage**: LocalStorage as primary (with size monitoring and fallback to IndexedDB only if needed)
-- **Tech Stack**: Plain JavaScript + HTML + Tailwind CSS (no React)
+- **Tech Stack**: Plain JavaScript + HTML + CSS (no React, no external CSS frameworks)
 - **Build Tool**: Vite (retained)
 - **Performance**: Initial load < 200ms (stricter requirement)
 
@@ -111,7 +111,6 @@ chrome-extension-rephraser/
 │   │   ├── validators.js      # Input validation
 │   │   └── dom-helpers.js     # DOM manipulation utilities
 │   └── config.js              # Constants and configuration
-├── tailwind.config.js
 ├── vite.config.js
 └── package.json
 ```
@@ -121,7 +120,7 @@ chrome-extension-rephraser/
 #### 4.2.1 Frontend
 - **Pure JavaScript** (ES6+ modules)
 - **HTML5** (single popup.html)
-- **Tailwind CSS** (via CDN or build - optimized for production)
+- **Plain CSS** (all styles contained in popup.html)
 - **No Framework**: Vanilla JS for maximum speed
 
 #### 4.2.2 Build Tool
@@ -577,10 +576,12 @@ export class IndexedDBStorage {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Rephraser</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="popup.css">
+  <style>
+    /* All CSS styles are defined here */
+    /* No external dependencies */
+  </style>
 </head>
-<body class="w-[400px] min-h-[450px] bg-gray-50">
+<body>
   
   <!-- Header -->
   <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
@@ -731,88 +732,8 @@ export class IndexedDBStorage {
 ### 8.3 CSS (Minimal Custom Styles)
 
 ```css
-/* popup/popup.css */
-
-/* Mode button styles */
-.mode-btn {
-  @apply px-3 py-2 text-sm font-medium border border-gray-300 rounded-lg transition-all;
-  @apply hover:border-blue-500 hover:text-blue-600;
-}
-
-.mode-btn.active {
-  @apply bg-blue-600 text-white border-blue-600;
-}
-
-/* Scrollbar styles */
-#historyContent::-webkit-scrollbar {
-  width: 6px;
-}
-
-#historyContent::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-#historyContent::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 3px;
-}
-
-#historyContent::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-/* History item styles */
-.history-item {
-  @apply bg-white border border-gray-200 rounded-lg p-3 hover:border-blue-300 transition-colors;
-}
-
-.history-item-header {
-  @apply flex items-center justify-between mb-2;
-}
-
-.history-badge {
-  @apply text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 font-medium;
-}
-
-.history-timestamp {
-  @apply text-xs text-gray-500;
-}
-
-.history-text {
-  @apply text-sm text-gray-700 mb-2 line-clamp-2;
-}
-
-.history-actions {
-  @apply flex gap-2;
-}
-
-.history-btn {
-  @apply text-xs px-2 py-1 rounded hover:bg-gray-100 transition-colors;
-}
-
-/* Animations */
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.slide-down {
-  animation: slideDown 0.2s ease-out;
-}
-
-/* Focus states */
-textarea:focus,
-select:focus,
-input:focus {
-  outline: none;
-}
+/* All styles are now directly included in popup.html */
+/* No separate CSS file is needed */
 ```
 
 ---
