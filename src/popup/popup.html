@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Rephraser</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Inline styles for better Chrome extension compatibility -->
+  <style>
+    /* Mode button styles */
+    .mode-btn {
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      transition: all 0.2s;
+    }
+    
+    .mode-btn:hover {
+      border-color: #3b82f6;
+      color: #2563eb;
+    }
+    
+    .mode-btn.active {
+      background-color: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+    
+    /* Scrollbar styles */
+    #historyContent::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    #historyContent::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+    
+    #historyContent::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 3px;
+    }
+    
+    #historyContent::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+    
+    /* History item styles */
+    .history-item {
+      background-color: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      transition: border-color 0.2s;
+    }
+    
+    .history-item:hover {
+      border-color: #93c5fd;
+    }
+    
+    .history-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    
+    .history-badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      background-color: #dbeafe;
+      color: #1d4ed8;
+      font-weight: 500;
+    }
+    
+    .history-timestamp {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+    
+    .history-text {
+      font-size: 0.875rem;
+      color: #374151;
+      margin-bottom: 0.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .history-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .history-btn {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      transition: background-color 0.2s;
+    }
+    
+    .history-btn:hover {
+      background-color: #f3f4f6;
+    }
+    
+    /* Animations */
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .slide-down {
+      animation: slideDown 0.2s ease-out;
+    }
+    
+    /* Focus states */
+    textarea:focus,
+    select:focus,
+    input:focus {
+      outline: none;
+    }
+  </style>
+</head>
+<body class="w-[400px] min-h-[450px] bg-gray-50">
+  
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+    <h1 class="text-lg font-semibold text-gray-800">AI Rephraser</h1>
+    <button id="settingsBtn" class="text-gray-500 hover:text-gray-700">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+      </svg>
+    </button>
+  </header>
+
+  <!-- Main Content -->
+  <main class="p-4 space-y-4">
+    
+    <!-- Input Section -->
+    <div class="space-y-2">
+      <div class="relative">
+        <textarea 
+          id="inputText" 
+          placeholder="Enter text to rephrase..."
+          class="w-full h-32 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          maxlength="2000"
+        ></textarea>
+        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
+          <span id="charCount">0</span>/2000
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode Selection -->
+    <div class="grid grid-cols-4 gap-2">
+      <button class="mode-btn active" data-mode="improve">Improve</button>
+      <button class="mode-btn" data-mode="simplify">Simplify</button>
+      <button class="mode-btn" data-mode="detail">Detail</button>
+      <button class="mode-btn" data-mode="shorten">Shorten</button>
+    </div>
+
+    <!-- Tone & Provider Row -->
+    <div class="flex gap-2">
+      <select id="toneSelect" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+        <option value="professional">Professional</option>
+        <option value="casual">Casual</option>
+        <option value="friendly">Friendly</option>
+        <option value="direct">Direct</option>
+      </select>
+      
+      <select id="providerSelect" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+        <!-- Populated dynamically based on available API keys -->
+      </select>
+    </div>
+
+    <!-- Rephrase Button -->
+    <button 
+      id="rephraseBtn" 
+      class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+    >
+      Rephrase
+    </button>
+
+    <!-- Output Section (hidden initially) -->
+    <div id="outputSection" class="hidden space-y-2">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-medium text-gray-700">Result</h3>
+        <span id="copiedNotice" class="text-xs text-green-600 opacity-0 transition-opacity">✓ Copied!</span>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-lg p-3 text-sm text-gray-800" id="outputText"></div>
+    </div>
+
+    <!-- History Section -->
+    <div class="border-t border-gray-200 pt-4">
+      <button id="historyToggle" class="w-full flex items-center justify-between text-sm font-medium text-gray-700 hover:text-gray-900">
+        <span>History (<span id="historyCount">0</span>)</span>
+        <svg class="w-4 h-4 transform transition-transform" id="historyChevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      
+      <div id="historyContent" class="hidden mt-3 space-y-2 max-h-48 overflow-y-auto">
+        <!-- History items populated dynamically -->
+      </div>
+      
+      <button id="clearHistoryBtn" class="hidden w-full mt-2 text-xs text-red-600 hover:text-red-700">
+        Clear All History
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Settings Modal (hidden initially) -->
+  <div id="settingsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-[350px] max-h-[500px] overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">Settings</h2>
+        <button id="closeSettingsBtn" class="text-gray-500 hover:text-gray-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="space-y-4">
+        <!-- OpenAI -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">OpenAI API Key</label>
+          <input type="password" id="openaiKey" placeholder="sk-..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+        </div>
+        
+        <!-- Gemini -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Gemini API Key</label>
+          <input type="password" id="geminiKey" placeholder="AIza..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+        </div>
+        
+        <!-- Groq -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Groq API Key</label>
+          <input type="password" id="groqKey" placeholder="gsk_..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+        </div>
+        
+        <!-- Ollama -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Ollama URL</label>
+          <input type="text" id="ollamaUrl" value="http://localhost:11434" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          <p class="text-xs text-gray-500 mt-1">Make sure Ollama is running locally</p>
+        </div>
+        
+        <button id="saveSettingsBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg">
+          Save Settings
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="hidden fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-40">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+      <p class="text-sm text-gray-600 mt-2">Rephrasing...</p>
+    </div>
+  </div>
+
+  <script type="module" src="./popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "text-rephraser-extension",
+  "version": "1.0.0",
+  "description": "AI-powered text rephrasing Chrome extension",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:chrome": "vite --mode chrome",
+    "dev:extension": "vite build --watch",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.0-beta.23",
+    "@vitejs/plugin-react": "^5.0.4",
+    "tailwindcss": "^4.1.14",
+    "vite": "^7.1.9"
+  }
+}
