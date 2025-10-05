@@ -1,4 +1,4 @@
-# AI-Powered Text Rephraser Chrome Extension
+# TextCraft AI - AI-Powered Text Rephraser Chrome Extension
 
 A lightweight Chrome extension that provides AI-powered text rephrasing capabilities with multiple modes and tones of voice.
 
@@ -36,8 +36,8 @@ A lightweight Chrome extension that provides AI-powered text rephrasing capabili
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/text-rephraser-extension.git
-   cd text-rephraser-extension
+   git clone https://github.com/yourusername/textcraft-ai.git
+   cd textcraft-ai
    ```
 
 2. Install dependencies:

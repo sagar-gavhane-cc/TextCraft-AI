@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "AI Text Rephraser",
+  "name": "TextCraft AI",
   "version": "1.0.0",
-  "description": "AI-powered text rephrasing with multiple modes and tones",
+  "description": "Transform your text with AI-powered rephrasing in multiple modes and tones. Simplify, improve, detail, or shorten your writing.",
   "permissions": [
     "storage",
     "clipboardWrite"

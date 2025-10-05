@@ -1,7 +1,7 @@
 {
-  "name": "text-rephraser-extension",
+  "name": "textcraft-ai",
   "version": "1.0.0",
-  "description": "AI-powered text rephrasing Chrome extension",
+  "description": "Transform your text with AI-powered rephrasing in multiple modes and tones",
   "type": "module",
   "scripts": {
     "dev": "vite",
