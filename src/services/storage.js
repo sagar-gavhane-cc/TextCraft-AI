@@ -41,7 +41,27 @@ export class StorageService {
    * @param {Object} settings - Settings object
    */
   saveSettings(settings) {
-    this.storage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+    chrome.storage.sync.set({ settings });
+  }
+  
+  /**
+   * Save input text to storage
+   * @param {string} input - Input text to save
+   */
+  saveInput(input) {
+    chrome.storage.local.set({ savedInput: input });
+  }
+  
+  /**
+   * Get saved input text
+   * @returns {string} - Saved input text or empty string if none
+   */
+  getSavedInput() {
+    return new Promise((resolve) => {
+      chrome.storage.local.get(['savedInput'], (result) => {
+        resolve(result.savedInput || '');
+      });
+    });
   }
 
   /**

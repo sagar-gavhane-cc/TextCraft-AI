@@ -58,6 +58,13 @@ class RephraseApp {
     // Load saved settings
     await this.loadSettings();
     
+    // Load saved input text if any
+    const savedInput = await this.storage.getSavedInput();
+    if (savedInput) {
+      this.elements.inputText.value = savedInput;
+      this.updateCharCount();
+    }
+    
     // Initialize providers
     await this.initializeProviders();
     
@@ -147,6 +154,8 @@ class RephraseApp {
     this.elements.inputText.addEventListener('input', () => {
       this.updateCharCount();
       this.validateInput();
+      // Save input text to storage
+      this.storage.saveInput(this.elements.inputText.value);
     });
     
     // Mode buttons
