@@ -27,6 +27,8 @@ IMPORTANT INSTRUCTIONS:
 - Do not add any prefixes like "Rephrased:" or similar
 - Preserve any technical terminology, names, or specific jargon
 - Ensure the output is grammatically correct and flows naturally
+- Format the output for Slack: use plain text, avoid markdown formatting (no **bold**, *italic*, # headers, or code blocks)
+- Use simple formatting like line breaks and basic punctuation for readability
 `.trim();
 }
 
@@ -113,7 +115,8 @@ Return your response in the following JSON format:
 IMPORTANT:
 - Return ONLY valid JSON, no additional text before or after
 - Ensure the JSON is properly formatted and parseable
-- Use proper Jira formatting conventions in the description
+- Use markdown or Jira formatting conventions in the description (e.g., *bold*, _italic_, code blocks, bullet points, numbered lists)
+- Jira supports markdown-style formatting, so use standard markdown syntax that works in Jira
 - Make the title actionable and specific
 `.trim();
 }
@@ -127,7 +130,8 @@ export function buildStandupPrompt(notes) {
   return `
 TASK: Create a professional daily standup summary suitable for sharing with stakeholders.
 
-STANDUP NOTES:
+Standup Date: ${new Date().toLocaleDateString()}
+Standup Notes:
 """
 ${notes}
 """
@@ -135,9 +139,9 @@ ${notes}
 INSTRUCTIONS:
 Transform the provided notes into a well-structured, professional standup summary that includes:
 
-1. SUMMARY: A concise overview of completed work and progress
-2. ACTION ITEMS: Clear, actionable items for teammates with owners where applicable
-3. BLOCKERS/DEPENDENCIES: Any impediments or dependencies that need attention
+1. Standup Summary: A concise overview of completed work and progress
+2. Action Items: Clear, actionable items for teammates with owners where applicable
+3. Blockers/Dependencies: Any impediments or dependencies that need attention
 
 FORMATTING GUIDELINES:
 - Use clear section headers
@@ -147,16 +151,21 @@ FORMATTING GUIDELINES:
 - Make action items specific and time-bound when possible
 
 OUTPUT FORMAT:
-Return a formatted text summary with clear sections. Use markdown-style formatting:
-- Use ## for section headers
-- Use bullet points (-) for action items
+Return a formatted text summary suitable for Slack. Use Slack-friendly formatting (NOT markdown):
+- Use plain text section headers in UPPERCASE or Title Case followed by a colon
+- Use simple bullet points (• or -) for action items
+- Use line breaks to separate sections
+- Avoid markdown syntax (no **bold**, *italic*, # headers, or code blocks)
+- Use simple formatting like colons, dashes, and line breaks for structure
 - Keep the tone professional and stakeholder-friendly
 - Do not include any meta-commentary or explanations
+- Please include the date of the standup in the summary
 
 IMPORTANT:
 - Return ONLY the formatted summary text
 - Maintain professional tone throughout
 - Ensure action items are clear and assignable
 - Keep the summary concise but comprehensive
+- Format for Slack compatibility: plain text with simple formatting only
 `.trim();
 }
