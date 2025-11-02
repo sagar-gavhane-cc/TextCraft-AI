@@ -5,7 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TextCraft AI</title>
   <style>
-    /* Reset and base styles */
+    /* ============================================
+       DESIGN TOKENS (CSS Custom Properties)
+       ============================================ */
+    :root {
+      /* Colors - Primary */
+      --color-primary: #2563eb;
+      --color-primary-hover: #1d4ed8;
+      --color-primary-light: #dbeafe;
+      --color-primary-dark: #1e40af;
+      
+      /* Colors - Semantic */
+      --color-success: #059669;
+      --color-success-light: #d1fae5;
+      --color-error: #dc2626;
+      --color-error-light: #fee2e2;
+      --color-warning: #d97706;
+      --color-warning-light: #fef3c7;
+      
+      /* Colors - Gray Scale */
+      --color-gray-50: #f9fafb;
+      --color-gray-100: #f3f4f6;
+      --color-gray-200: #e5e7eb;
+      --color-gray-300: #d1d5db;
+      --color-gray-400: #9ca3af;
+      --color-gray-500: #6b7280;
+      --color-gray-600: #4b5563;
+      --color-gray-700: #374151;
+      --color-gray-800: #1f2937;
+      --color-gray-900: #111827;
+      
+      /* Colors - Base */
+      --color-white: #ffffff;
+      --color-black: #000000;
+      
+      /* Spacing Scale */
+      --space-xs: 0.25rem;   /* 4px */
+      --space-sm: 0.5rem;    /* 8px */
+      --space-md: 0.75rem;   /* 12px */
+      --space-lg: 1rem;      /* 16px */
+      --space-xl: 1.5rem;    /* 24px */
+      --space-2xl: 2rem;     /* 32px */
+      --space-3xl: 3rem;     /* 48px */
+      
+      /* Typography */
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-size-xs: 0.75rem;     /* 12px */
+      --font-size-sm: 0.875rem;    /* 14px */
+      --font-size-base: 1rem;      /* 16px */
+      --font-size-lg: 1.125rem;    /* 18px */
+      --font-size-xl: 1.25rem;     /* 20px */
+      --font-weight-normal: 400;
+      --font-weight-medium: 500;
+      --font-weight-semibold: 600;
+      --font-weight-bold: 700;
+      --line-height-tight: 1.25;
+      --line-height-normal: 1.5;
+      --line-height-relaxed: 1.75;
+      
+      /* Border Radius */
+      --radius-sm: 0.25rem;   /* 4px */
+      --radius-md: 0.5rem;    /* 8px */
+      --radius-lg: 0.75rem;   /* 12px */
+      --radius-full: 9999px;
+      
+      /* Shadows */
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      
+      /* Transitions */
+      --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+      
+      /* Focus Ring */
+      --focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      --focus-ring-offset: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-primary);
+    }
+    
+    /* ============================================
+       RESET AND BASE STYLES
+       ============================================ */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -15,12 +97,18 @@
     body {
       width: 400px;
       min-height: 450px;
-      background-color: #f9fafb;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      color: #111827;
+      background-color: var(--color-gray-50);
+      font-family: var(--font-family);
+      color: var(--color-gray-900);
+      font-size: var(--font-size-base);
+      line-height: var(--line-height-normal);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
     
-    /* Layout */
+    /* ============================================
+       LAYOUT UTILITIES
+       ============================================ */
     .w-full {
       width: 100%;
     }
@@ -41,18 +129,6 @@
       justify-content: center;
     }
     
-    .space-y-2 > * + * {
-      margin-top: 0.5rem;
-    }
-    
-    .space-y-4 > * + * {
-      margin-top: 1rem;
-    }
-    
-    .gap-2 {
-      gap: 0.5rem;
-    }
-    
     .grid {
       display: grid;
     }
@@ -65,95 +141,303 @@
       flex: 1 1 0%;
     }
     
+    /* Spacing Utilities - Gap */
+    .gap-xs {
+      gap: var(--space-xs);
+    }
+    
+    .gap-sm {
+      gap: var(--space-sm);
+    }
+    
+    .gap-md {
+      gap: var(--space-md);
+    }
+    
+    .gap-lg {
+      gap: var(--space-lg);
+    }
+    
+    .gap-xl {
+      gap: var(--space-xl);
+    }
+    
+    .gap-2 {
+      gap: var(--space-sm);
+    }
+    
+    .gap-3 {
+      gap: var(--space-md);
+    }
+    
+    .gap-4 {
+      gap: var(--space-lg);
+    }
+    
+    /* Spacing Utilities - Vertical Spacing */
+    .space-y-xs > * + * {
+      margin-top: var(--space-xs);
+    }
+    
+    .space-y-sm > * + * {
+      margin-top: var(--space-sm);
+    }
+    
+    .space-y-md > * + * {
+      margin-top: var(--space-md);
+    }
+    
+    .space-y-lg > * + * {
+      margin-top: var(--space-lg);
+    }
+    
+    .space-y-xl > * + * {
+      margin-top: var(--space-xl);
+    }
+    
+    .space-y-2 > * + * {
+      margin-top: var(--space-sm);
+    }
+    
+    .space-y-3 > * + * {
+      margin-top: var(--space-md);
+    }
+    
+    .space-y-4 > * + * {
+      margin-top: var(--space-lg);
+    }
+    
+    /* Spacing Utilities - Padding */
+    .p-xs {
+      padding: var(--space-xs);
+    }
+    
+    .p-sm {
+      padding: var(--space-sm);
+    }
+    
+    .p-md {
+      padding: var(--space-md);
+    }
+    
+    .p-lg {
+      padding: var(--space-lg);
+    }
+    
+    .p-xl {
+      padding: var(--space-xl);
+    }
+    
     .p-3 {
-      padding: 0.75rem;
+      padding: var(--space-md);
     }
     
     .p-4 {
-      padding: 1rem;
+      padding: var(--space-lg);
     }
     
     .p-6 {
-      padding: 1.5rem;
+      padding: var(--space-xl);
+    }
+    
+    .px-xs {
+      padding-left: var(--space-xs);
+      padding-right: var(--space-xs);
+    }
+    
+    .px-sm {
+      padding-left: var(--space-sm);
+      padding-right: var(--space-sm);
+    }
+    
+    .px-md {
+      padding-left: var(--space-md);
+      padding-right: var(--space-md);
+    }
+    
+    .px-lg {
+      padding-left: var(--space-lg);
+      padding-right: var(--space-lg);
+    }
+    
+    .px-xl {
+      padding-left: var(--space-xl);
+      padding-right: var(--space-xl);
     }
     
     .px-3 {
-      padding-left: 0.75rem;
-      padding-right: 0.75rem;
+      padding-left: var(--space-md);
+      padding-right: var(--space-md);
     }
     
     .px-4 {
-      padding-left: 1rem;
-      padding-right: 1rem;
+      padding-left: var(--space-lg);
+      padding-right: var(--space-lg);
+    }
+    
+    .py-xs {
+      padding-top: var(--space-xs);
+      padding-bottom: var(--space-xs);
+    }
+    
+    .py-sm {
+      padding-top: var(--space-sm);
+      padding-bottom: var(--space-sm);
+    }
+    
+    .py-md {
+      padding-top: var(--space-md);
+      padding-bottom: var(--space-md);
+    }
+    
+    .py-lg {
+      padding-top: var(--space-lg);
+      padding-bottom: var(--space-lg);
+    }
+    
+    .py-xl {
+      padding-top: var(--space-xl);
+      padding-bottom: var(--space-xl);
     }
     
     .py-2 {
-      padding-top: 0.5rem;
-      padding-bottom: 0.5rem;
+      padding-top: var(--space-sm);
+      padding-bottom: var(--space-sm);
     }
     
     .py-3 {
-      padding-top: 0.75rem;
-      padding-bottom: 0.75rem;
+      padding-top: var(--space-md);
+      padding-bottom: var(--space-md);
     }
-
+    
     .py-4 {
-      padding-top: 1rem;
-      padding-bottom: 1rem;
+      padding-top: var(--space-lg);
+      padding-bottom: var(--space-lg);
+    }
+    
+    .pt-xs {
+      padding-top: var(--space-xs);
+    }
+    
+    .pt-sm {
+      padding-top: var(--space-sm);
+    }
+    
+    .pt-md {
+      padding-top: var(--space-md);
+    }
+    
+    .pt-lg {
+      padding-top: var(--space-lg);
+    }
+    
+    .pt-xl {
+      padding-top: var(--space-xl);
     }
     
     .pt-4 {
-      padding-top: 1rem;
+      padding-top: var(--space-lg);
+    }
+    
+    /* Spacing Utilities - Margin */
+    .mb-xs {
+      margin-bottom: var(--space-xs);
+    }
+    
+    .mb-sm {
+      margin-bottom: var(--space-sm);
+    }
+    
+    .mb-md {
+      margin-bottom: var(--space-md);
+    }
+    
+    .mb-lg {
+      margin-bottom: var(--space-lg);
+    }
+    
+    .mb-xl {
+      margin-bottom: var(--space-xl);
     }
     
     .mb-1 {
-      margin-bottom: 0.25rem;
+      margin-bottom: var(--space-xs);
     }
     
     .mb-4 {
-      margin-bottom: 1rem;
+      margin-bottom: var(--space-lg);
+    }
+    
+    .mt-xs {
+      margin-top: var(--space-xs);
+    }
+    
+    .mt-sm {
+      margin-top: var(--space-sm);
+    }
+    
+    .mt-md {
+      margin-top: var(--space-md);
+    }
+    
+    .mt-lg {
+      margin-top: var(--space-lg);
+    }
+    
+    .mt-xl {
+      margin-top: var(--space-xl);
     }
     
     .mt-1 {
-      margin-top: 0.25rem;
+      margin-top: var(--space-xs);
     }
     
     .mt-2 {
-      margin-top: 0.5rem;
+      margin-top: var(--space-sm);
     }
     
     .mt-3 {
-      margin-top: 0.75rem;
+      margin-top: var(--space-md);
     }
-
+    
+    .my-xs {
+      margin-top: var(--space-xs);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .my-sm {
+      margin-top: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+    
+    .my-md {
+      margin-top: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+    
+    .my-lg {
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+    
+    .my-xl {
+      margin-top: var(--space-xl);
+      margin-bottom: var(--space-xl);
+    }
+    
     .my-1 {
-      margin-top: 0.25rem;
-      margin-bottom: 0.25rem;
+      margin-top: var(--space-xs);
+      margin-bottom: var(--space-xs);
     }
-
+    
     .my-2 {
-      margin-top: 0.5rem;
-      margin-bottom: 0.5rem;
+      margin-top: var(--space-sm);
+      margin-bottom: var(--space-sm);
     }
-
+    
     .my-3 {
-      margin-top: 0.75rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .mx-1 {
-      margin-left: 0.25rem;
-      margin-right: 0.25rem;
-    }
-
-    .mx-2 {
-      margin-left: 0.5rem;
-      margin-right: 0.5rem;
-    }
-
-    .mx-3 {
-      margin-left: 0.75rem;
-      margin-right: 0.75rem;
+      margin-top: var(--space-md);
+      margin-bottom: var(--space-md);
     }
     
     .mx-auto {
@@ -161,111 +445,183 @@
       margin-right: auto;
     }
     
-    /* Typography */
+    /* ============================================
+       TYPOGRAPHY UTILITIES
+       ============================================ */
     .text-xs {
-      font-size: 0.75rem;
+      font-size: var(--font-size-xs);
+      line-height: var(--line-height-tight);
     }
     
     .text-sm {
-      font-size: 0.875rem;
+      font-size: var(--font-size-sm);
+      line-height: var(--line-height-normal);
+    }
+    
+    .text-base {
+      font-size: var(--font-size-base);
+      line-height: var(--line-height-normal);
     }
     
     .text-lg {
-      font-size: 1.125rem;
+      font-size: var(--font-size-lg);
+      line-height: var(--line-height-relaxed);
+    }
+    
+    .text-xl {
+      font-size: var(--font-size-xl);
+      line-height: var(--line-height-relaxed);
+    }
+    
+    .font-normal {
+      font-weight: var(--font-weight-normal);
     }
     
     .font-medium {
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
     }
     
     .font-semibold {
-      font-weight: 600;
+      font-weight: var(--font-weight-semibold);
+    }
+    
+    .font-bold {
+      font-weight: var(--font-weight-bold);
     }
     
     .text-center {
       text-align: center;
     }
     
-    /* Colors */
+    .text-left {
+      text-align: left;
+    }
+    
+    .text-right {
+      text-align: right;
+    }
+    
+    .uppercase {
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .whitespace-pre-wrap {
+      white-space: pre-wrap;
+    }
+    
+    /* ============================================
+       COLOR UTILITIES
+       ============================================ */
+    /* Text Colors */
     .text-gray-500 {
-      color: #6b7280;
+      color: var(--color-gray-500);
     }
     
     .text-gray-600 {
-      color: #4b5563;
+      color: var(--color-gray-600);
     }
     
     .text-gray-700 {
-      color: #374151;
+      color: var(--color-gray-700);
     }
     
     .text-gray-800 {
-      color: #1f2937;
+      color: var(--color-gray-800);
     }
     
     .text-gray-900 {
-      color: #111827;
+      color: var(--color-gray-900);
     }
     
-    .text-green-600 {
-      color: #059669;
+    .text-primary {
+      color: var(--color-primary);
+    }
+    
+    .text-success {
+      color: var(--color-success);
+    }
+    
+    .text-error {
+      color: var(--color-error);
     }
     
     .text-red-600 {
-      color: #dc2626;
+      color: var(--color-error);
     }
     
     .text-red-700 {
       color: #b91c1c;
     }
     
-    .text-white {
-      color: #ffffff;
+    .text-green-600 {
+      color: var(--color-success);
+    }
+    
+    .text-yellow-600 {
+      color: var(--color-warning);
     }
     
     .text-blue-600 {
-      color: #2563eb;
+      color: var(--color-primary);
     }
     
+    .text-white {
+      color: var(--color-white);
+    }
+    
+    /* Background Colors */
     .bg-white {
-      background-color: #ffffff;
-    }
-    
-    .bg-blue-600 {
-      background-color: #2563eb;
-    }
-    
-    .bg-blue-700 {
-      background-color: #1d4ed8;
-    }
-    
-    .bg-red-50 {
-      background-color: #fee2e2;
-    }
-    
-    .bg-gray-300 {
-      background-color: #d1d5db;
+      background-color: var(--color-white);
     }
     
     .bg-gray-50 {
-      background-color: #f9fafb;
+      background-color: var(--color-gray-50);
+    }
+    
+    .bg-gray-100 {
+      background-color: var(--color-gray-100);
+    }
+    
+    .bg-gray-300 {
+      background-color: var(--color-gray-300);
+    }
+    
+    .bg-primary {
+      background-color: var(--color-primary);
+    }
+    
+    .bg-primary-hover {
+      background-color: var(--color-primary-hover);
+    }
+    
+    .bg-blue-600 {
+      background-color: var(--color-primary);
+    }
+    
+    .bg-blue-700 {
+      background-color: var(--color-primary-hover);
+    }
+    
+    .bg-red-50 {
+      background-color: var(--color-error-light);
     }
     
     .bg-black {
-      background-color: #000000;
+      background-color: var(--color-black);
     }
     
     .bg-opacity-50 {
-      --bg-opacity: 0.5;
-      background-color: rgba(0, 0, 0, var(--bg-opacity));
+      background-color: rgba(0, 0, 0, 0.5);
     }
     
     .bg-opacity-75 {
-      --bg-opacity: 0.75;
-      background-color: rgba(255, 255, 255, var(--bg-opacity));
+      background-color: rgba(255, 255, 255, 0.75);
     }
     
-    /* Borders */
+    /* ============================================
+       BORDER UTILITIES
+       ============================================ */
     .border {
       border-width: 1px;
       border-style: solid;
@@ -286,39 +642,57 @@
       border-bottom-style: solid;
     }
     
+    .border-none {
+      border: none;
+    }
+    
     .border-gray-200 {
-      border-color: #e5e7eb;
+      border-color: var(--color-gray-200);
     }
     
     .border-gray-300 {
-      border-color: #d1d5db;
+      border-color: var(--color-gray-300);
+    }
+    
+    .border-primary {
+      border-color: var(--color-primary);
     }
     
     .border-blue-600 {
-      border-color: #2563eb;
+      border-color: var(--color-primary);
+    }
+    
+    .border-red-500 {
+      border-color: var(--color-error);
+    }
+    
+    .border-red-200 {
+      border-color: #fecaca;
     }
     
     .border-transparent {
       border-color: transparent;
     }
     
+    .rounded-sm {
+      border-radius: var(--radius-sm);
+    }
+    
+    .rounded-md {
+      border-radius: var(--radius-md);
+    }
+    
     .rounded-lg {
-      border-radius: 0.5rem;
+      border-radius: var(--radius-md);
     }
     
     .rounded-full {
-      border-radius: 9999px;
+      border-radius: var(--radius-full);
     }
     
-    /* Components */
-    .hidden {
-      display: none;
-    }
-    
-    .block {
-      display: block;
-    }
-    
+    /* ============================================
+       POSITION UTILITIES
+       ============================================ */
     .relative {
       position: relative;
     }
@@ -339,11 +713,11 @@
     }
     
     .bottom-2 {
-      bottom: 0.5rem;
+      bottom: var(--space-sm);
     }
     
     .right-2 {
-      right: 0.5rem;
+      right: var(--space-sm);
     }
     
     .z-40 {
@@ -354,14 +728,17 @@
       z-index: 50;
     }
     
+    /* ============================================
+       SIZE UTILITIES
+       ============================================ */
+    .h-4 {
+      height: 1rem;
+    }
+    
     .h-5 {
       height: 1.25rem;
     }
     
-    .h-4 {
-      height: 1rem;
-    }
-
     .h-6 {
       height: 1.5rem;
     }
@@ -374,14 +751,14 @@
       height: 8rem;
     }
     
+    .w-4 {
+      width: 1rem;
+    }
+    
     .w-5 {
       width: 1.25rem;
     }
     
-    .w-4 {
-      width: 1rem;
-    }
-
     .w-6 {
       width: 1.5rem;
     }
@@ -401,27 +778,40 @@
     .max-h-500px {
       max-height: 500px;
     }
-
+    
+    /* ============================================
+       DISPLAY UTILITIES
+       ============================================ */
+    .hidden {
+      display: none;
+    }
+    
+    .block {
+      display: block;
+    }
+    
+    /* ============================================
+       INTERACTIVE UTILITIES
+       ============================================ */
     .cursor-pointer {
       cursor: pointer;
     }
-
-    .border-none {
-      border: none;
-    }
     
-    .overflow-y-auto {
-      overflow-y: auto;
+    .cursor-not-allowed {
+      cursor: not-allowed;
     }
     
     .resize-none {
       resize: none;
     }
     
-    .transform {
-      transform: translateX(0) translateY(0) rotate(0) skewX(0) skewY(0) scaleX(1) scaleY(1);
+    .overflow-y-auto {
+      overflow-y: auto;
     }
     
+    /* ============================================
+       TRANSITION UTILITIES
+       ============================================ */
     .transition-colors {
       transition-property: background-color, border-color, color, fill, stroke;
       transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -440,38 +830,109 @@
       transition-duration: 150ms;
     }
     
+    .transition-all {
+      transition-property: all;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-duration: var(--transition-base);
+    }
+    
+    /* ============================================
+       OPACITY UTILITIES
+       ============================================ */
     .opacity-0 {
       opacity: 0;
     }
     
+    .opacity-100 {
+      opacity: 1;
+    }
+    
+    /* ============================================
+       TRANSFORM UTILITIES
+       ============================================ */
+    .transform {
+      transform: translateX(0) translateY(0) rotate(0) skewX(0) skewY(0) scaleX(1) scaleY(1);
+    }
+    
+    .rotate-180 {
+      transform: rotate(180deg);
+    }
+    
+    /* ============================================
+       HOVER STATES
+       ============================================ */
     .hover\:bg-blue-700:hover {
-      background-color: #1d4ed8;
+      background-color: var(--color-primary-hover);
+    }
+    
+    .hover\:bg-gray-50:hover {
+      background-color: var(--color-gray-50);
+    }
+    
+    .hover\:bg-gray-100:hover {
+      background-color: var(--color-gray-100);
+    }
+    
+    .hover\:bg-red-50:hover {
+      background-color: var(--color-error-light);
     }
     
     .hover\:text-gray-700:hover {
-      color: #374151;
+      color: var(--color-gray-700);
     }
     
     .hover\:text-gray-900:hover {
-      color: #111827;
+      color: var(--color-gray-900);
     }
     
     .hover\:text-red-700:hover {
       color: #b91c1c;
     }
     
+    .hover\:border-gray-400:hover {
+      border-color: var(--color-gray-400);
+    }
+    
+    /* ============================================
+       DISABLED STATES
+       ============================================ */
     .disabled\:bg-gray-300:disabled {
-      background-color: #d1d5db;
+      background-color: var(--color-gray-300);
     }
     
     .disabled\:cursor-not-allowed:disabled {
       cursor: not-allowed;
     }
-
-    .whitespace-pre-wrap {
-      white-space: pre-wrap;
+    
+    /* ============================================
+       FOCUS STATES
+       ============================================ */
+    .focus\:ring-2:focus {
+      box-shadow: var(--focus-ring);
     }
     
+    .focus\:ring-blue-500:focus {
+      box-shadow: var(--focus-ring);
+    }
+    
+    .focus\:border-transparent:focus {
+      border-color: transparent;
+    }
+    
+    textarea:focus,
+    select:focus,
+    input:focus {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+    
+    select {
+      padding-right: var(--space-2xl);
+    }
+    
+    /* ============================================
+       ANIMATIONS
+       ============================================ */
     .animate-spin {
       animation: spin 1s linear infinite;
     }
@@ -485,144 +946,6 @@
       }
     }
     
-    /* Mode button styles */
-    .mode-btn {
-      padding: 0.75rem 1rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      border: 1px solid #d1d5db;
-      border-radius: 0.5rem;
-      transition: all 0.2s;
-    }
-    
-    .mode-btn:hover {
-      border-color: #3b82f6;
-      color: #2563eb;
-    }
-    
-    .mode-btn.active {
-      background-color: #2563eb;
-      color: white;
-      border-color: #2563eb;
-    }
-    
-    /* Scrollbar styles */
-    #historyContent::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    #historyContent::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 3px;
-    }
-    
-    #historyContent::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 3px;
-    }
-    
-    #historyContent::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
-    
-    /* History item styles */
-    .history-item {
-      background-color: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.5rem;
-      padding: 0.75rem;
-      transition: border-color 0.2s;
-      margin-bottom: 0.5rem;
-      position: relative;
-    }
-    
-    .history-item:hover {
-      border-color: #93c5fd;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    }
-    
-    .history-item-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 0.5rem;
-    }
-    
-    .history-badge {
-      font-size: 0.75rem;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
-      background-color: #dbeafe;
-      color: #1d4ed8;
-      font-weight: 500;
-    }
-    
-    .history-timestamp {
-      font-size: 0.75rem;
-      color: #6b7280;
-    }
-    
-    .history-text {
-      font-size: 0.875rem;
-      color: #374151;
-      margin-bottom: 0.5rem;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    
-    .history-actions {
-      display: flex;
-      gap: 0.25rem;
-      justify-content: flex-end;
-    }
-    
-    .history-btn {
-      width: 2rem;
-      height: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 9999px;
-      transition: all 0.2s;
-      background-color: transparent;
-      border: none;
-      cursor: pointer;
-    }
-    
-    .history-btn:hover {
-      background-color: #f3f4f6;
-    }
-    
-    .history-btn.delete-btn:hover {
-      background-color: #fee2e2;
-    }
-    
-    .history-btn-tooltip {
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: rgba(0, 0, 0, 0.75);
-      color: white;
-      font-size: 0.7rem;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
-      opacity: 0;
-      transition: opacity 0.2s;
-      pointer-events: none;
-      white-space: nowrap;
-      margin-bottom: 0.25rem;
-    }
-    
-    .history-btn:hover .history-btn-tooltip {
-      opacity: 1;
-    }
-    
-    /* Animations */
     @keyframes slideDown {
       from {
         opacity: 0;
@@ -635,62 +958,49 @@
     }
     
     .slide-down {
-      animation: slideDown 0.2s ease-out;
+      animation: slideDown var(--transition-base) ease-out;
     }
     
-    /* Focus states */
-    textarea:focus,
-    select:focus,
-    input:focus {
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+    /* ============================================
+       COMPONENT STYLES
+       ============================================ */
+    
+    /* Header */
+    header {
+      background-color: var(--color-white);
+      border-bottom: 1px solid var(--color-gray-200);
+      box-shadow: var(--shadow-sm);
     }
     
-    /* Select styling */
-    select {
-      padding-right: 2rem;
-    }
-    
-    .focus\:ring-2:focus {
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-    }
-    
-    .focus\:ring-blue-500:focus {
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-    }
-    
-    .focus\:border-transparent:focus {
-      border-color: transparent;
-    }
-    
-    /* Tab Navigation Styles */
+    /* Tab Navigation */
     .tab-nav {
       display: flex;
-      border-bottom: 1px solid #e5e7eb;
-      background-color: white;
+      border-bottom: 1px solid var(--color-gray-200);
+      background-color: var(--color-white);
     }
     
     .tab-btn {
       flex: 1;
-      padding: 0.75rem 1rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #6b7280;
+      padding: var(--space-md) var(--space-lg);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-gray-500);
       background-color: transparent;
       border: none;
       border-bottom: 2px solid transparent;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all var(--transition-base);
     }
     
     .tab-btn:hover {
-      color: #374151;
-      background-color: #f9fafb;
+      color: var(--color-gray-700);
+      background-color: var(--color-gray-50);
     }
     
     .tab-btn.active {
-      color: #2563eb;
-      border-bottom-color: #2563eb;
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+      font-weight: var(--font-weight-semibold);
     }
     
     .tab-panel {
@@ -699,6 +1009,324 @@
     
     .tab-panel.active {
       display: block;
+    }
+    
+    /* Mode Buttons */
+    .mode-btn {
+      padding: var(--space-md) var(--space-lg);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      border: 1px solid var(--color-gray-300);
+      border-radius: var(--radius-md);
+      background-color: var(--color-white);
+      color: var(--color-gray-700);
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+    
+    .mode-btn:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background-color: var(--color-primary-light);
+    }
+    
+    .mode-btn.active {
+      background-color: var(--color-primary);
+      color: var(--color-white);
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    /* Form Inputs */
+    textarea,
+    select,
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: var(--space-md);
+      font-size: var(--font-size-sm);
+      font-family: var(--font-family);
+      color: var(--color-gray-900);
+      background-color: var(--color-white);
+      border: 1px solid var(--color-gray-300);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-base);
+    }
+    
+    textarea:hover,
+    select:hover,
+    input:hover {
+      border-color: var(--color-gray-400);
+    }
+    
+    textarea:focus,
+    select:focus,
+    input:focus {
+      border-color: var(--color-primary);
+    }
+    
+    textarea::placeholder,
+    input::placeholder {
+      color: var(--color-gray-400);
+    }
+    
+    /* Primary Button */
+    button[class*="bg-blue-600"],
+    .btn-primary {
+      background-color: var(--color-primary);
+      color: var(--color-white);
+      font-weight: var(--font-weight-medium);
+      padding: var(--space-md) var(--space-lg);
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    button[class*="bg-blue-600"]:hover:not(:disabled),
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--color-primary-hover);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    
+    button[class*="bg-blue-600"]:active:not(:disabled),
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    /* Character Counter */
+    .char-counter {
+      position: absolute;
+      bottom: var(--space-sm);
+      right: var(--space-sm);
+      font-size: var(--font-size-xs);
+      color: var(--color-gray-500);
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: var(--space-xs);
+      border-radius: var(--radius-sm);
+    }
+    
+    /* Output Card */
+    .output-card {
+      background-color: var(--color-white);
+      border: 1px solid var(--color-gray-200);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition-base);
+    }
+    
+    .output-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--color-gray-300);
+    }
+    
+    /* History Section */
+    .history-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-sm) var(--space-md);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-gray-700);
+      background-color: var(--color-white);
+      border: 1px solid var(--color-gray-200);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+    
+    .history-toggle:hover {
+      background-color: var(--color-gray-50);
+      color: var(--color-gray-900);
+      border-color: var(--color-gray-300);
+    }
+    
+    /* History Item */
+    .history-item {
+      background-color: var(--color-white);
+      border: 1px solid var(--color-gray-200);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      margin-bottom: var(--space-sm);
+      position: relative;
+      transition: all var(--transition-base);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .history-item:hover {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    
+    .history-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .history-badge {
+      font-size: var(--font-size-xs);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-sm);
+      background-color: var(--color-primary-light);
+      color: var(--color-primary-dark);
+      font-weight: var(--font-weight-medium);
+      display: inline-block;
+    }
+    
+    .history-timestamp {
+      font-size: var(--font-size-xs);
+      color: var(--color-gray-500);
+    }
+    
+    .history-text {
+      font-size: var(--font-size-sm);
+      color: var(--color-gray-700);
+      margin-bottom: var(--space-sm);
+      line-height: var(--line-height-relaxed);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    
+    .history-actions {
+      display: flex;
+      gap: var(--space-xs);
+      justify-content: flex-end;
+    }
+    
+    .history-btn {
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-full);
+      transition: all var(--transition-base);
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--color-gray-600);
+    }
+    
+    .history-btn:hover {
+      background-color: var(--color-gray-100);
+      color: var(--color-gray-900);
+    }
+    
+    .history-btn.delete-btn:hover {
+      background-color: var(--color-error-light);
+      color: var(--color-error);
+    }
+    
+    .history-btn-tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.85);
+      color: var(--color-white);
+      font-size: var(--font-size-xs);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-sm);
+      opacity: 0;
+      transition: opacity var(--transition-base);
+      pointer-events: none;
+      white-space: nowrap;
+      margin-bottom: var(--space-xs);
+    }
+    
+    .history-btn:hover .history-btn-tooltip {
+      opacity: 1;
+    }
+    
+    /* Scrollbar Styles */
+    #historyContent::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    #historyContent::-webkit-scrollbar-track {
+      background: var(--color-gray-100);
+      border-radius: var(--radius-sm);
+    }
+    
+    #historyContent::-webkit-scrollbar-thumb {
+      background: var(--color-gray-400);
+      border-radius: var(--radius-sm);
+    }
+    
+    #historyContent::-webkit-scrollbar-thumb:hover {
+      background: var(--color-gray-500);
+    }
+    
+    /* Settings Modal */
+    #settingsModal {
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+    }
+    
+    #settingsModal > div {
+      background-color: var(--color-white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      max-height: 90vh;
+    }
+    
+    /* Loading Overlay */
+    #loadingOverlay {
+      background-color: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(2px);
+    }
+    
+    /* Clear History Button */
+    #clearHistoryBtn {
+      background-color: var(--color-error-light);
+      color: var(--color-error);
+      border: 1px solid var(--color-error-light);
+    }
+    
+    #clearHistoryBtn:hover {
+      background-color: var(--color-error);
+      color: var(--color-white);
+      border-color: var(--color-error);
+    }
+    
+    /* Settings Button */
+    #settingsBtn {
+      padding: var(--space-xs);
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-base);
+    }
+    
+    #settingsBtn:hover {
+      background-color: var(--color-gray-100);
+    }
+    
+    /* Form Labels */
+    label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-gray-700);
+      margin-bottom: var(--space-xs);
+    }
+    
+    /* Help Text */
+    .help-text {
+      font-size: var(--font-size-xs);
+      color: var(--color-gray-500);
+      margin-top: var(--space-xs);
     }
   </style>
 </head>
@@ -736,14 +1364,14 @@
             class="w-full h-32 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             maxlength="2000"
           ></textarea>
-          <div class="absolute bottom-2 right-2 text-xs text-gray-500">
+          <div class="absolute bottom-2 right-2 text-xs text-gray-500 char-counter">
             <span id="charCount">0</span>/2000
           </div>
         </div>
       </div>
 
       <!-- Mode Selection -->
-      <div class="grid grid-cols-4 gap-2 my-2">
+      <div class="grid grid-cols-4 gap-2 mt-3">
         <button class="mode-btn active" data-mode="improve">Improve</button>
         <button class="mode-btn" data-mode="simplify">Simplify</button>
         <button class="mode-btn" data-mode="detail">Detail</button>
@@ -751,7 +1379,7 @@
       </div>
 
       <!-- Tone & Provider Row -->
-      <div class="flex gap-2 my-2">
+      <div class="flex gap-2 mt-3">
         <select id="toneSelect" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer hover:border-gray-400">
           <option value="professional">Professional</option>
           <option value="casual">Casual</option>
@@ -759,7 +1387,7 @@
           <option value="direct">Direct</option>
         </select>
         
-        <select id="providerSelect" class="flex-1 px-3 py-2 my-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer hover:border-gray-400">
+        <select id="providerSelect" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer hover:border-gray-400">
           <!-- Populated dynamically based on available API keys -->
         </select>
       </div>
@@ -767,7 +1395,7 @@
       <!-- Rephrase Button -->
       <button 
         id="rephraseBtn" 
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 my-2 border-none cursor-pointer rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 mt-3 border-none cursor-pointer rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
       >
         Rephrase
       </button>
@@ -778,7 +1406,7 @@
           <h3 class="text-sm font-medium text-gray-700">Result</h3>
           <span id="copiedNotice" class="text-xs text-green-600 opacity-0 transition-opacity">✓ Copied!</span>
         </div>
-        <div class="bg-white border border-gray-200 rounded-lg p-3 text-sm text-gray-800" id="outputText"></div>
+        <div class="output-card text-sm text-gray-800" id="outputText"></div>
       </div>
     </div>
 
@@ -793,14 +1421,14 @@
             class="w-full h-32 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             maxlength="2000"
           ></textarea>
-          <div class="absolute bottom-2 right-2 text-xs text-gray-500">
+          <div class="absolute bottom-2 right-2 text-xs text-gray-500 char-counter">
             <span id="jiraCharCount">0</span>/2000
           </div>
         </div>
       </div>
 
       <!-- Provider Row -->
-      <div class="flex gap-2">
+      <div class="flex gap-2 mt-3">
         <select id="jiraProviderSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer hover:border-gray-400">
           <!-- Populated dynamically based on available API keys -->
         </select>
@@ -809,7 +1437,7 @@
       <!-- Generate Button -->
       <button 
         id="generateJiraBtn" 
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 border-none cursor-pointer rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 mt-3 border-none cursor-pointer rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
       >
         Generate Ticket
       </button>
@@ -820,7 +1448,7 @@
           <h3 class="text-sm font-medium text-gray-700">Generated Ticket</h3>
           <span id="jiraCopiedNotice" class="text-xs text-green-600 opacity-0 transition-opacity">✓ Copied!</span>
         </div>
-        <div class="bg-white border border-gray-200 rounded-lg p-3 space-y-3 text-sm text-gray-800">
+        <div class="output-card space-y-3 text-sm text-gray-800">
           <div>
             <label class="text-xs font-semibold text-gray-600 uppercase">Type</label>
             <div id="jiraType" class="mt-1"></div>
@@ -848,14 +1476,14 @@
             class="w-full h-32 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             maxlength="2000"
           ></textarea>
-          <div class="absolute bottom-2 right-2 text-xs text-gray-500">
+          <div class="absolute bottom-2 right-2 text-xs text-gray-500 char-counter">
             <span id="standupCharCount">0</span>/2000
           </div>
         </div>
       </div>
 
       <!-- Provider Row -->
-      <div class="flex gap-2">
+      <div class="flex gap-2 mt-3">
         <select id="standupProviderSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer hover:border-gray-400">
           <!-- Populated dynamically based on available API keys -->
         </select>
@@ -864,7 +1492,7 @@
       <!-- Generate Button -->
       <button 
         id="generateStandupBtn" 
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 border-none cursor-pointer rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 mt-3 border-none cursor-pointer rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
       >
         Generate Summary
       </button>
@@ -875,13 +1503,13 @@
           <h3 class="text-sm font-medium text-gray-700">Summary</h3>
           <span id="standupCopiedNotice" class="text-xs text-green-600 opacity-0 transition-opacity">✓ Copied!</span>
         </div>
-        <div class="bg-white border border-gray-200 rounded-lg p-3 text-sm text-gray-800 whitespace-pre-wrap" id="standupOutputText"></div>
+        <div class="output-card text-sm text-gray-800 whitespace-pre-wrap" id="standupOutputText"></div>
       </div>
     </div>
 
     <!-- History Section (shared across all tabs) -->
     <div class="border-t border-gray-200 pt-4">
-      <button id="historyToggle" class="w-full flex items-center justify-between text-sm font-medium text-gray-700 hover:text-gray-900 py-2 px-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+      <button id="historyToggle" class="history-toggle text-sm font-medium text-gray-700 hover:text-gray-900">
         <span>History (<span id="historyCount">0</span>)</span>
         <svg class="w-4 h-4 transform transition-transform" id="historyChevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -892,7 +1520,7 @@
         <!-- History items populated dynamically -->
       </div>
       
-      <button id="clearHistoryBtn" class="hidden w-full mt-3 py-3 text-sm font-medium text-red-600 bg-red-50 hover:text-red-700 border border-red-200 rounded-lg hover:bg-red-50 transition-colors cursor-pointer border-none">
+      <button id="clearHistoryBtn" class="hidden w-full mt-3 py-3 text-sm font-medium text-red-600 bg-red-50 hover:text-red-700 border border-red-200 rounded-lg transition-all cursor-pointer">
         Clear All History
       </button>
     </div>
@@ -934,7 +1562,7 @@
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Ollama URL</label>
           <input type="text" id="ollamaUrl" value="http://localhost:11434" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-          <p class="text-xs text-gray-500 mt-1">Make sure Ollama is running locally</p>
+          <p class="help-text">Make sure Ollama is running locally</p>
         </div>
         
         <button id="saveSettingsBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 border-none rounded-lg cursor-pointer">
