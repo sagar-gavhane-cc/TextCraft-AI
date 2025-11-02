@@ -17,6 +17,7 @@ class RephraseApp {
     this.currentMode = DEFAULTS.mode;
     this.currentTone = DEFAULTS.tone;
     this.currentProvider = null;
+    this.currentModel = null;
     this.isProcessing = false;
     this.currentTab = TAB_TYPES.REPHRASER;
     
@@ -32,6 +33,7 @@ class RephraseApp {
       modeButtons: document.querySelectorAll('.mode-btn'),
       toneSelect: document.getElementById('toneSelect'),
       providerSelect: document.getElementById('providerSelect'),
+      modelSelect: document.getElementById('modelSelect'),
       rephraseBtn: document.getElementById('rephraseBtn'),
       outputSection: document.getElementById('outputSection'),
       outputText: document.getElementById('outputText'),
@@ -41,6 +43,7 @@ class RephraseApp {
       jiraInputText: document.getElementById('jiraInputText'),
       jiraCharCount: document.getElementById('jiraCharCount'),
       jiraProviderSelect: document.getElementById('jiraProviderSelect'),
+      jiraModelSelect: document.getElementById('jiraModelSelect'),
       generateJiraBtn: document.getElementById('generateJiraBtn'),
       jiraOutputSection: document.getElementById('jiraOutputSection'),
       jiraType: document.getElementById('jiraType'),
@@ -52,6 +55,7 @@ class RephraseApp {
       standupInputText: document.getElementById('standupInputText'),
       standupCharCount: document.getElementById('standupCharCount'),
       standupProviderSelect: document.getElementById('standupProviderSelect'),
+      standupModelSelect: document.getElementById('standupModelSelect'),
       generateStandupBtn: document.getElementById('generateStandupBtn'),
       standupOutputSection: document.getElementById('standupOutputSection'),
       standupOutputText: document.getElementById('standupOutputText'),
@@ -201,6 +205,98 @@ class RephraseApp {
     this.elements.standupProviderSelect.value = selectedProvider;
     
     this.currentProvider = selectedProvider;
+    
+    // Initialize model dropdowns for the selected provider
+    if (selectedProvider) {
+      await this.updateModelDropdown(selectedProvider);
+    } else {
+      // Disable model dropdowns if no provider
+      this.elements.modelSelect.disabled = true;
+      this.elements.jiraModelSelect.disabled = true;
+      this.elements.standupModelSelect.disabled = true;
+    }
+  }
+  
+  /**
+   * Update model dropdown based on selected provider
+   * @param {string} provider - Provider name
+   */
+  async updateModelDropdown(provider) {
+    const settings = this.storage.getSettings();
+    const defaultModels = DEFAULTS.defaultModels || {};
+    
+    // Get default model for this provider
+    const defaultModel = settings.models?.[provider] || defaultModels[provider] || '';
+    
+    // Get all model select elements
+    const modelSelects = [
+      this.elements.modelSelect,
+      this.elements.jiraModelSelect,
+      this.elements.standupModelSelect
+    ];
+    
+    // Clear all model dropdowns
+    modelSelects.forEach(select => {
+      select.innerHTML = '';
+      select.disabled = false;
+    });
+    
+    // Try to fetch models from API
+    let availableModels = [];
+    try {
+      availableModels = await this.aiService.getProviderModels(provider);
+    } catch (error) {
+      console.error(`Failed to fetch models for ${provider}:`, error);
+    }
+    
+    // If no models from API, use default model only
+    if (availableModels.length === 0 && defaultModel) {
+      availableModels = [defaultModel];
+    }
+    
+    // If still no models, add default model as fallback
+    if (availableModels.length === 0) {
+      availableModels = defaultModel ? [defaultModel] : [];
+    }
+    
+    // Populate model dropdowns
+    modelSelects.forEach(select => {
+      if (availableModels.length === 0) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'No models available';
+        select.appendChild(option);
+        select.disabled = true;
+      } else {
+        availableModels.forEach(model => {
+          const option = document.createElement('option');
+          option.value = model;
+          option.textContent = model;
+          select.appendChild(option.cloneNode(true));
+        });
+        
+        // Set selected model
+        const selectedModel = defaultModel && availableModels.includes(defaultModel) 
+          ? defaultModel 
+          : availableModels[0];
+        select.value = selectedModel;
+        this.currentModel = selectedModel;
+      }
+    });
+  }
+  
+  /**
+   * Save model selection for the current provider
+   */
+  saveModelSelection() {
+    if (!this.currentProvider || !this.currentModel) return;
+    
+    const settings = this.storage.getSettings();
+    if (!settings.models) {
+      settings.models = {};
+    }
+    settings.models[this.currentProvider] = this.currentModel;
+    this.storage.saveSettings(settings);
   }
   
   /**
@@ -255,11 +351,18 @@ class RephraseApp {
     
     // Sync provider selection across tabs
     const activeProvider = this.currentProvider || this.elements.providerSelect.value;
+    const activeModel = this.currentModel || this.elements.modelSelect.value;
     if (activeProvider) {
       this.elements.providerSelect.value = activeProvider;
       this.elements.jiraProviderSelect.value = activeProvider;
       this.elements.standupProviderSelect.value = activeProvider;
       this.currentProvider = activeProvider;
+    }
+    if (activeModel) {
+      this.elements.modelSelect.value = activeModel;
+      this.elements.jiraModelSelect.value = activeModel;
+      this.elements.standupModelSelect.value = activeModel;
+      this.currentModel = activeModel;
     }
     
     // Focus input in new tab
@@ -292,11 +395,28 @@ class RephraseApp {
     });
     
     // Provider select
-    this.elements.providerSelect.addEventListener('change', (e) => {
+    this.elements.providerSelect.addEventListener('change', async (e) => {
       this.currentProvider = e.target.value;
       this.elements.jiraProviderSelect.value = e.target.value;
       this.elements.standupProviderSelect.value = e.target.value;
       this.saveProviderSelection();
+      
+      // Update model dropdown when provider changes
+      if (this.currentProvider) {
+        await this.updateModelDropdown(this.currentProvider);
+      } else {
+        this.elements.modelSelect.disabled = true;
+        this.elements.jiraModelSelect.disabled = true;
+        this.elements.standupModelSelect.disabled = true;
+      }
+    });
+    
+    // Model select
+    this.elements.modelSelect.addEventListener('change', (e) => {
+      this.currentModel = e.target.value;
+      this.elements.jiraModelSelect.value = e.target.value;
+      this.elements.standupModelSelect.value = e.target.value;
+      this.saveModelSelection();
     });
     
     // Rephrase button
@@ -324,11 +444,28 @@ class RephraseApp {
     });
     
     // Provider select
-    this.elements.jiraProviderSelect.addEventListener('change', (e) => {
+    this.elements.jiraProviderSelect.addEventListener('change', async (e) => {
       this.currentProvider = e.target.value;
       this.elements.providerSelect.value = e.target.value;
       this.elements.standupProviderSelect.value = e.target.value;
       this.saveProviderSelection();
+      
+      // Update model dropdown when provider changes
+      if (this.currentProvider) {
+        await this.updateModelDropdown(this.currentProvider);
+      } else {
+        this.elements.modelSelect.disabled = true;
+        this.elements.jiraModelSelect.disabled = true;
+        this.elements.standupModelSelect.disabled = true;
+      }
+    });
+    
+    // Model select
+    this.elements.jiraModelSelect.addEventListener('change', (e) => {
+      this.currentModel = e.target.value;
+      this.elements.modelSelect.value = e.target.value;
+      this.elements.standupModelSelect.value = e.target.value;
+      this.saveModelSelection();
     });
     
     // Generate button
@@ -356,11 +493,28 @@ class RephraseApp {
     });
     
     // Provider select
-    this.elements.standupProviderSelect.addEventListener('change', (e) => {
+    this.elements.standupProviderSelect.addEventListener('change', async (e) => {
       this.currentProvider = e.target.value;
       this.elements.providerSelect.value = e.target.value;
       this.elements.jiraProviderSelect.value = e.target.value;
       this.saveProviderSelection();
+      
+      // Update model dropdown when provider changes
+      if (this.currentProvider) {
+        await this.updateModelDropdown(this.currentProvider);
+      } else {
+        this.elements.modelSelect.disabled = true;
+        this.elements.jiraModelSelect.disabled = true;
+        this.elements.standupModelSelect.disabled = true;
+      }
+    });
+    
+    // Model select
+    this.elements.standupModelSelect.addEventListener('change', (e) => {
+      this.currentModel = e.target.value;
+      this.elements.modelSelect.value = e.target.value;
+      this.elements.jiraModelSelect.value = e.target.value;
+      this.saveModelSelection();
     });
     
     // Generate button
@@ -506,7 +660,8 @@ class RephraseApp {
         text,
         mode: this.currentMode,
         tone: this.currentTone,
-        provider: this.currentProvider
+        provider: this.currentProvider,
+        model: this.currentModel || this.elements.modelSelect.value
       });
       
       // Display result
@@ -573,7 +728,8 @@ class RephraseApp {
     try {
       const ticket = await this.aiService.generateJiraTicket({
         description,
-        provider
+        provider,
+        model: this.currentModel || this.elements.jiraModelSelect.value
       });
       
       // Display result
@@ -651,7 +807,8 @@ class RephraseApp {
     try {
       const summary = await this.aiService.generateStandupSummary({
         notes,
-        provider
+        provider,
+        model: this.currentModel || this.elements.standupModelSelect.value
       });
       
       // Display result

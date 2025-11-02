@@ -7,11 +7,12 @@ export class OpenAIProvider {
   /**
    * Create a new OpenAI provider
    * @param {string} apiKey - OpenAI API key
+   * @param {string} model - Model name (default: 'gpt-4o-mini')
    */
-  constructor(apiKey) {
+  constructor(apiKey, model = 'gpt-4o-mini') {
     this.apiKey = apiKey;
     this.baseUrl = 'https://api.openai.com/v1';
-    this.model = 'gpt-4o-mini';
+    this.model = model;
   }
   
   /**
@@ -93,5 +94,38 @@ export class OpenAIProvider {
     
     const data = await response.json();
     return data.choices[0].message.content.trim();
+  }
+  
+  /**
+   * List available models from OpenAI
+   * @returns {Promise<Array<string>>} - List of available model names
+   */
+  async listModels() {
+    try {
+      const response = await fetch(`${this.baseUrl}/models`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to fetch OpenAI models:', response.status, response.statusText);
+        return [];
+      }
+      
+      const data = await response.json();
+      // Filter for chat models (gpt-* models)
+      const chatModels = data.data
+        .filter(m => m.id.startsWith('gpt-'))
+        .map(m => m.id)
+        .sort();
+      
+      return chatModels;
+    } catch (error) {
+      console.error('Error listing OpenAI models:', error);
+      return [];
+    }
   }
 }

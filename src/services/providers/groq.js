@@ -7,11 +7,12 @@ export class GroqProvider {
   /**
    * Create a new Groq provider
    * @param {string} apiKey - Groq API key
+   * @param {string} model - Model name (default: 'llama-3.1-8b-instant')
    */
-  constructor(apiKey) {
+  constructor(apiKey, model = 'llama-3.1-8b-instant') {
     this.apiKey = apiKey;
     this.baseUrl = 'https://api.groq.com/openai/v1';
-    this.model = 'llama-3.1-8b-instant';
+    this.model = model;
   }
   
   /**
@@ -93,5 +94,40 @@ export class GroqProvider {
     
     const data = await response.json();
     return data.choices[0].message.content.trim();
+  }
+  
+  /**
+   * List available models from Groq
+   * @returns {Promise<Array<string>>} - List of available model names
+   */
+  async listModels() {
+    try {
+      const response = await fetch(`${this.baseUrl}/models`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to fetch Groq models:', response.status, response.statusText);
+        return [];
+      }
+      
+      const data = await response.json();
+      // Filter for chat completion models
+      const chatModels = data.data
+        ? data.data
+            .filter(m => m.id && (m.id.includes('llama') || m.id.includes('mixtral')))
+            .map(m => m.id)
+            .sort()
+        : [];
+      
+      return chatModels;
+    } catch (error) {
+      console.error('Error listing Groq models:', error);
+      return [];
+    }
   }
 }

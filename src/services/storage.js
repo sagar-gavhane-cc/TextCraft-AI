@@ -33,7 +33,9 @@ export class StorageService {
    */
   getSettings() {
     const settings = this.storage.getItem(STORAGE_KEYS.SETTINGS);
-    return settings ? JSON.parse(settings) : DEFAULTS;
+    const parsed = settings ? JSON.parse(settings) : {};
+    // Merge with defaults to ensure all default values are present
+    return { ...DEFAULTS, ...parsed };
   }
 
   /**
@@ -41,7 +43,10 @@ export class StorageService {
    * @param {Object} settings - Settings object
    */
   saveSettings(settings) {
-    chrome.storage.sync.set({ settings });
+    // Merge with existing settings to preserve other values
+    const currentSettings = this.getSettings();
+    const mergedSettings = { ...currentSettings, ...settings };
+    this.storage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(mergedSettings));
   }
   
   /**
@@ -145,5 +150,67 @@ export class StorageService {
       warning: percentUsed > 80,
       critical: percentUsed > 95
     };
+  }
+  
+  /**
+   * Get cached model list for a provider
+   * @param {string} provider - Provider name
+   * @returns {Array<string>|null} - Cached model list or null if not cached
+   */
+  getCachedModels(provider) {
+    try {
+      const cacheKey = `model_cache_${provider}`;
+      const cached = this.storage.getItem(cacheKey);
+      if (!cached) return null;
+      
+      const parsed = JSON.parse(cached);
+      return parsed.models || null;
+    } catch (error) {
+      console.error(`Error reading cached models for ${provider}:`, error);
+      return null;
+    }
+  }
+  
+  /**
+   * Save model list to cache with timestamp
+   * @param {string} provider - Provider name
+   * @param {Array<string>} models - List of model names
+   */
+  saveCachedModels(provider, models) {
+    try {
+      const cacheKey = `model_cache_${provider}`;
+      const cacheData = {
+        models: models,
+        timestamp: Date.now()
+      };
+      this.storage.setItem(cacheKey, JSON.stringify(cacheData));
+    } catch (error) {
+      console.error(`Error saving cached models for ${provider}:`, error);
+    }
+  }
+  
+  /**
+   * Check if model cache is still valid
+   * @param {string} provider - Provider name
+   * @param {number} maxAgeHours - Maximum age in hours (default: 24)
+   * @returns {boolean} - Whether cache is valid
+   */
+  isModelCacheValid(provider, maxAgeHours = 24) {
+    try {
+      const cacheKey = `model_cache_${provider}`;
+      const cached = this.storage.getItem(cacheKey);
+      if (!cached) return false;
+      
+      const parsed = JSON.parse(cached);
+      if (!parsed.timestamp) return false;
+      
+      const maxAge = maxAgeHours * 60 * 60 * 1000; // Convert hours to milliseconds
+      const age = Date.now() - parsed.timestamp;
+      
+      return age < maxAge;
+    } catch (error) {
+      console.error(`Error checking cache validity for ${provider}:`, error);
+      return false;
+    }
   }
 }

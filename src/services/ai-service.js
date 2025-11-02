@@ -22,14 +22,15 @@ export class AIService {
   /**
    * Rephrase text using the specified provider
    * @param {Object} request - Rephrase request
+   * @param {string} request.model - Model name (optional)
    * @returns {Promise<string>} - Rephrased text
    */
   async rephrase(request) {
-    const { text, mode, tone, provider } = request;
+    const { text, mode, tone, provider, model } = request;
     
-    // Initialize provider if not already done
-    if (!this.providers[provider]) {
-      await this.initializeProvider(provider);
+    // Initialize provider if not already done or if model changed
+    if (!this.providers[provider] || (model && this.providers[provider].model !== model)) {
+      await this.initializeProvider(provider, model);
     }
     
     if (!this.providers[provider]) {
@@ -61,34 +62,39 @@ export class AIService {
   /**
    * Initialize a provider
    * @param {string} providerName - Provider name
+   * @param {string} model - Model name (optional)
    */
-  async initializeProvider(providerName) {
+  async initializeProvider(providerName, model = null) {
     const apiKeys = this.storage.getAPIKeys();
     const settings = this.storage.getSettings();
+    const defaultModels = DEFAULTS.defaultModels || {};
     
     switch (providerName) {
       case AIProvider.OPENAI:
         if (apiKeys.openaiKey) {
-          this.providers[AIProvider.OPENAI] = new OpenAIProvider(apiKeys.openaiKey);
+          const selectedModel = model || settings.models?.openai || defaultModels.openai || 'gpt-4o-mini';
+          this.providers[AIProvider.OPENAI] = new OpenAIProvider(apiKeys.openaiKey, selectedModel);
         }
         break;
         
       case AIProvider.GEMINI:
         if (apiKeys.geminiKey) {
-          this.providers[AIProvider.GEMINI] = new GeminiProvider(apiKeys.geminiKey);
+          const selectedModel = model || settings.models?.gemini || defaultModels.gemini || 'gemini-1.5-flash';
+          this.providers[AIProvider.GEMINI] = new GeminiProvider(apiKeys.geminiKey, selectedModel);
         }
         break;
         
       case AIProvider.GROQ:
         if (apiKeys.groqKey) {
-          this.providers[AIProvider.GROQ] = new GroqProvider(apiKeys.groqKey);
+          const selectedModel = model || settings.models?.groq || defaultModels.groq || 'llama-3.1-8b-instant';
+          this.providers[AIProvider.GROQ] = new GroqProvider(apiKeys.groqKey, selectedModel);
         }
         break;
         
       case AIProvider.OLLAMA:
         const ollamaUrl = settings.ollamaUrl || DEFAULTS.ollamaUrl;
-        const ollamaModel = settings.ollamaModel || DEFAULTS.ollamaModel;
-        this.providers[AIProvider.OLLAMA] = new OllamaProvider(ollamaUrl, ollamaModel);
+        const selectedModel = model || settings.models?.ollama || settings.ollamaModel || defaultModels.ollama || DEFAULTS.ollamaModel;
+        this.providers[AIProvider.OLLAMA] = new OllamaProvider(ollamaUrl, selectedModel);
         break;
     }
   }
@@ -210,14 +216,15 @@ export class AIService {
    * @param {Object} request - Jira ticket request
    * @param {string} request.description - Description of the issue/feature
    * @param {string} request.provider - Provider to use
+   * @param {string} request.model - Model name (optional)
    * @returns {Promise<Object>} - Jira ticket object with type, title, description
    */
   async generateJiraTicket(request) {
-    const { description, provider } = request;
+    const { description, provider, model } = request;
     
-    // Initialize provider if not already done
-    if (!this.providers[provider]) {
-      await this.initializeProvider(provider);
+    // Initialize provider if not already done or if model changed
+    if (!this.providers[provider] || (model && this.providers[provider].model !== model)) {
+      await this.initializeProvider(provider, model);
     }
     
     if (!this.providers[provider]) {
@@ -277,14 +284,15 @@ export class AIService {
    * @param {Object} request - Standup summary request
    * @param {string} request.notes - Standup notes
    * @param {string} request.provider - Provider to use
+   * @param {string} request.model - Model name (optional)
    * @returns {Promise<string>} - Formatted standup summary
    */
   async generateStandupSummary(request) {
-    const { notes, provider } = request;
+    const { notes, provider, model } = request;
     
-    // Initialize provider if not already done
-    if (!this.providers[provider]) {
-      await this.initializeProvider(provider);
+    // Initialize provider if not already done or if model changed
+    if (!this.providers[provider] || (model && this.providers[provider].model !== model)) {
+      await this.initializeProvider(provider, model);
     }
     
     if (!this.providers[provider]) {
@@ -366,6 +374,83 @@ export class AIService {
     } catch (error) {
       console.error('Fallback also failed:', error);
       return null;
+    }
+  }
+  
+  /**
+   * Get available models for a provider
+   * @param {string} providerName - Provider name
+   * @param {string} apiKey - API key for the provider (optional, will fetch from storage)
+   * @returns {Promise<Array<string>>} - List of available model names
+   */
+  async getProviderModels(providerName, apiKey = null) {
+    // Check cache first
+    const maxAgeHours = 24; // Use 24 hours as default
+    if (this.storage.isModelCacheValid(providerName, maxAgeHours)) {
+      const cachedModels = this.storage.getCachedModels(providerName);
+      if (cachedModels && cachedModels.length > 0) {
+        console.log(`Using cached models for ${providerName}`);
+        return cachedModels;
+      }
+    }
+    
+    // Cache is invalid or missing, fetch from API
+    const apiKeys = this.storage.getAPIKeys();
+    const settings = this.storage.getSettings();
+    
+    try {
+      let models = [];
+      
+      switch (providerName) {
+        case AIProvider.OPENAI:
+          if (!apiKey) apiKey = apiKeys.openaiKey;
+          if (!apiKey) return [];
+          const openaiProvider = new OpenAIProvider(apiKey);
+          models = await openaiProvider.listModels();
+          break;
+          
+        case AIProvider.GEMINI:
+          if (!apiKey) apiKey = apiKeys.geminiKey;
+          if (!apiKey) return [];
+          const geminiProvider = new GeminiProvider(apiKey);
+          models = await geminiProvider.listModels();
+          break;
+          
+        case AIProvider.GROQ:
+          if (!apiKey) apiKey = apiKeys.groqKey;
+          if (!apiKey) return [];
+          const groqProvider = new GroqProvider(apiKey);
+          models = await groqProvider.listModels();
+          break;
+          
+        case AIProvider.OLLAMA:
+          const ollamaUrl = settings.ollamaUrl || DEFAULTS.ollamaUrl;
+          const ollamaProvider = new OllamaProvider(ollamaUrl);
+          models = await ollamaProvider.listModels();
+          break;
+          
+        default:
+          return [];
+      }
+      
+      // Cache the fetched models if we got any
+      if (models && models.length > 0) {
+        this.storage.saveCachedModels(providerName, models);
+        console.log(`Cached ${models.length} models for ${providerName}`);
+      }
+      
+      return models;
+    } catch (error) {
+      console.error(`Error fetching models for ${providerName}:`, error);
+      
+      // If API call fails, try to return cached models even if stale
+      const cachedModels = this.storage.getCachedModels(providerName);
+      if (cachedModels && cachedModels.length > 0) {
+        console.log(`API call failed, using stale cached models for ${providerName}`);
+        return cachedModels;
+      }
+      
+      return [];
     }
   }
 }

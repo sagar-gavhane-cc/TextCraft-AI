@@ -7,11 +7,12 @@ export class GeminiProvider {
   /**
    * Create a new Gemini provider
    * @param {string} apiKey - Gemini API key
+   * @param {string} model - Model name (default: 'gemini-1.5-flash')
    */
-  constructor(apiKey) {
+  constructor(apiKey, model = 'gemini-1.5-flash') {
     this.apiKey = apiKey;
     this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
-    this.model = 'gemini-1.5-flash';
+    this.model = model;
   }
   
   /**
@@ -110,5 +111,40 @@ export class GeminiProvider {
     }
     
     return data.candidates[0].content.parts[0].text.trim();
+  }
+  
+  /**
+   * List available models from Gemini
+   * @returns {Promise<Array<string>>} - List of available model names
+   */
+  async listModels() {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/models?key=${this.apiKey}`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+      
+      if (!response.ok) {
+        console.error('Failed to fetch Gemini models:', response.status, response.statusText);
+        return [];
+      }
+      
+      const data = await response.json();
+      // Filter for generation models (gemini-*)
+      const models = data.models
+        ? data.models
+            .filter(m => m.name && m.name.includes('models/gemini-') && m.supportedGenerationMethods?.includes('generateContent'))
+            .map(m => m.name.replace('models/', ''))
+            .sort()
+        : [];
+      
+      return models;
+    } catch (error) {
+      console.error('Error listing Gemini models:', error);
+      return [];
+    }
   }
 }

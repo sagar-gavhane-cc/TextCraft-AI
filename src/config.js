@@ -35,7 +35,14 @@ export const DEFAULTS = {
   historyLimit: 50,
   timeout: 15000, // 15 seconds
   ollamaUrl: 'http://localhost:11434',
-  ollamaModel: 'llama3.2'
+  ollamaModel: 'llama3.2',
+  defaultModels: {
+    openai: 'gpt-4o-mini',
+    gemini: 'gemini-1.5-flash',
+    groq: 'llama-3.1-8b-instant',
+    ollama: 'llama3.2'
+  },
+  modelCacheMaxAge: 24 * 60 * 60 * 1000 // 24 hours in milliseconds
 };
 
 // Storage keys
