@@ -390,6 +390,9 @@ class RephraseApp {
       this.currentModel = activeModel;
     }
     
+    // Refresh history display for the new tab
+    this.renderHistory();
+    
     // Focus input in new tab
     setTimeout(() => this.focusCurrentTabInput(), 100);
   }
@@ -628,8 +631,8 @@ class RephraseApp {
     
     // Clear history
     this.elements.clearHistoryBtn.addEventListener('click', () => {
-      if (confirm('Clear all history?')) {
-        this.storage.clearHistory();
+      if (confirm('Clear history for this tab?')) {
+        this.storage.clearHistory(this.currentTab);
         this.renderHistory();
       }
     });
@@ -1088,10 +1091,10 @@ class RephraseApp {
   }
   
   /**
-   * Render history items
+   * Render history items for the current tab
    */
   renderHistory() {
-    const history = this.storage.getHistory();
+    const history = this.storage.getHistory(this.currentTab);
     this.elements.historyCount.textContent = history.length;
     
     if (history.length === 0) {
@@ -1103,9 +1106,16 @@ class RephraseApp {
     this.elements.clearHistoryBtn.classList.remove('hidden');
     
     this.elements.historyContent.innerHTML = history.map(entry => {
-      const type = entry.type || TAB_TYPES.REPHRASER;
       const badgeText = this.getHistoryBadgeText(entry);
-      const displayText = this.getHistoryDisplayText(entry);
+      const inputText = entry.originalText || '';
+      const outputText = entry.rephrasedText || '';
+      
+      // Escape HTML for safe display
+      const escapeHtml = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      };
       
       return `
         <div class="history-item" data-id="${entry.id}">
@@ -1113,14 +1123,29 @@ class RephraseApp {
             <span class="history-badge">${badgeText}</span>
             <span class="history-timestamp">${formatTimestamp(entry.timestamp)}</span>
           </div>
-          <div class="history-text" data-id="${entry.id}">${truncateText(displayText, 80)}</div>
+          <div class="history-content-section">
+            <div class="history-input-section">
+              <div class="history-section-label">Input:</div>
+              <div class="history-text-scrollable whitespace-pre-wrap">${escapeHtml(inputText)}</div>
+              <button class="history-btn copy-input-btn" data-id="${entry.id}">
+                <div class="history-btn-tooltip">Copy Input</div>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+              </button>
+            </div>
+            <div class="history-output-section">
+              <div class="history-section-label">Output:</div>
+              <div class="history-text-scrollable whitespace-pre-wrap">${escapeHtml(outputText)}</div>
+              <button class="history-btn copy-output-btn" data-id="${entry.id}">
+                <div class="history-btn-tooltip">Copy Output</div>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
           <div class="history-actions">
-            <button class="history-btn copy-btn" data-id="${entry.id}">
-              <div class="history-btn-tooltip">Copy</div>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-              </svg>
-            </button>
             <button class="history-btn reuse-btn" data-id="${entry.id}">
               <div class="history-btn-tooltip">Reuse</div>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1139,10 +1164,17 @@ class RephraseApp {
     }).join('');
     
     // Add event listeners for history actions
-    this.elements.historyContent.querySelectorAll('.copy-btn').forEach(btn => {
+    this.elements.historyContent.querySelectorAll('.copy-input-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = e.currentTarget.dataset.id;
-        this.copyHistoryEntry(id);
+        this.copyInputHistoryEntry(id);
+      });
+    });
+    
+    this.elements.historyContent.querySelectorAll('.copy-output-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.dataset.id;
+        this.copyOutputHistoryEntry(id);
       });
     });
     
@@ -1157,14 +1189,6 @@ class RephraseApp {
       btn.addEventListener('click', (e) => {
         const id = e.currentTarget.dataset.id;
         this.deleteHistoryEntry(id);
-      });
-    });
-    
-    // Add event listeners for clicking on history text (also triggers reuse)
-    this.elements.historyContent.querySelectorAll('.history-text').forEach(text => {
-      text.addEventListener('click', (e) => {
-        const id = e.currentTarget.dataset.id;
-        this.reuseHistoryEntry(id);
       });
     });
   }
@@ -1190,39 +1214,32 @@ class RephraseApp {
   }
   
   /**
-   * Get display text for history entry
-   * @param {Object} entry - History entry
-   * @returns {string} - Display text
+   * Copy input text from history entry to clipboard
+   * @param {string} id - Entry ID
    */
-  getHistoryDisplayText(entry) {
-    const type = entry.type || TAB_TYPES.REPHRASER;
+  async copyInputHistoryEntry(id) {
+    const history = this.storage.getHistory(this.currentTab);
+    const entry = history.find(e => e.id === id);
     
-    switch (type) {
-      case TAB_TYPES.JIRA:
-        if (entry.ticketData) {
-          return entry.ticketData.title || entry.rephrasedText;
-        }
-        try {
-          const parsed = JSON.parse(entry.rephrasedText);
-          return parsed.title || entry.rephrasedText;
-        } catch {
-          return entry.rephrasedText;
-        }
-      case TAB_TYPES.STANDUP:
-        return entry.rephrasedText;
-      case TAB_TYPES.PROMPT_ENHANCER:
-        return entry.rephrasedText;
-      default:
-        return entry.rephrasedText;
+    if (entry && entry.originalText) {
+      await this.clipboard.copy(entry.originalText);
+      
+      // Show visual feedback on button
+      const button = this.elements.historyContent.querySelector(`.copy-input-btn[data-id="${id}"]`);
+      if (button) {
+        this.showCopyFeedback(button, 'Input');
+      }
+      
+      showToast('Input copied to clipboard!', 'success');
     }
   }
   
   /**
-   * Copy history entry to clipboard
+   * Copy output text from history entry to clipboard
    * @param {string} id - Entry ID
    */
-  async copyHistoryEntry(id) {
-    const history = this.storage.getHistory();
+  async copyOutputHistoryEntry(id) {
+    const history = this.storage.getHistory(this.currentTab);
     const entry = history.find(e => e.id === id);
     
     if (entry) {
@@ -1243,8 +1260,42 @@ class RephraseApp {
       }
       
       await this.clipboard.copy(textToCopy);
-      showToast('Copied to clipboard!', 'success');
+      
+      // Show visual feedback on button
+      const button = this.elements.historyContent.querySelector(`.copy-output-btn[data-id="${id}"]`);
+      if (button) {
+        this.showCopyFeedback(button, 'Output');
+      }
+      
+      showToast('Output copied to clipboard!', 'success');
     }
+  }
+  
+  /**
+   * Show visual feedback on copy button
+   * @param {HTMLElement} button - Copy button element
+   * @param {string} type - Type of copy ('Input' or 'Output')
+   */
+  showCopyFeedback(button, type) {
+    // Save original content
+    const originalContent = button.innerHTML;
+    
+    // Change to checkmark icon
+    button.innerHTML = `
+      <div class="history-btn-tooltip">${type} Copied!</div>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+    `;
+    
+    // Add copied class
+    button.classList.add('copied');
+    
+    // Restore original after 2 seconds
+    setTimeout(() => {
+      button.innerHTML = originalContent;
+      button.classList.remove('copied');
+    }, 2000);
   }
   
   /**
@@ -1252,7 +1303,8 @@ class RephraseApp {
    * @param {string} id - Entry ID
    */
   reuseHistoryEntry(id) {
-    const history = this.storage.getHistory();
+    // Get entry from current tab's history
+    const history = this.storage.getHistory(this.currentTab);
     const entry = history.find(e => e.id === id);
     
     if (!entry) return;
@@ -1312,7 +1364,7 @@ class RephraseApp {
    * @param {string} id - Entry ID
    */
   deleteHistoryEntry(id) {
-    this.storage.deleteHistoryEntry(id);
+    this.storage.deleteHistoryEntry(id, this.currentTab);
     this.renderHistory();
     showToast('Entry deleted');
   }

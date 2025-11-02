@@ -1200,6 +1200,62 @@
       cursor: pointer;
     }
     
+    .history-content-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      margin-bottom: var(--space-sm);
+    }
+    
+    .history-input-section,
+    .history-output-section {
+      position: relative;
+    }
+    
+    .history-section-label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-gray-600);
+      margin-bottom: var(--space-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .history-text-scrollable {
+      font-size: var(--font-size-sm);
+      color: var(--color-gray-700);
+      line-height: var(--line-height-relaxed);
+      padding: var(--space-sm);
+      background-color: var(--color-gray-50);
+      border: 1px solid var(--color-gray-200);
+      border-radius: var(--radius-sm);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin-bottom: var(--space-xs);
+    }
+    
+    .history-input-section .history-btn,
+    .history-output-section .history-btn {
+      position: absolute;
+      top: var(--space-xs);
+      right: var(--space-xs);
+    }
+    
+    .history-input-section .history-text-scrollable,
+    .history-output-section .history-text-scrollable {
+      padding-right: 2.5rem;
+    }
+    
+    .history-btn.copied {
+      background-color: var(--color-success-light);
+      color: var(--color-success);
+    }
+    
+    .history-btn.copied:hover {
+      background-color: var(--color-success-light);
+      color: var(--color-success);
+    }
+    
     .history-actions {
       display: flex;
       gap: var(--space-xs);
@@ -1415,10 +1471,10 @@
       <!-- Output Section (hidden initially) -->
       <div id="outputSection" class="hidden space-y-2">
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-medium text-gray-700">Result</h3>
+          <h3 class="text-sm font-medium text-gray-700 mt-3">Result</h3>
           <span id="copiedNotice" class="text-xs text-green-600 opacity-0 transition-opacity">✓ Copied!</span>
         </div>
-        <div class="output-card text-sm text-gray-800" id="outputText"></div>
+        <div class="output-card text-sm text-gray-800 whitespace-pre-wrap" id="outputText"></div>
       </div>
     </div>
 
@@ -1461,7 +1517,7 @@
       <!-- Output Section (hidden initially) -->
       <div id="jiraOutputSection" class="hidden space-y-2">
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-medium text-gray-700">Generated Ticket</h3>
+          <h3 class="text-sm font-medium text-gray-700 mt-3">Generated Ticket</h3>
           <span id="jiraCopiedNotice" class="text-xs text-green-600 opacity-0 transition-opacity">✓ Copied!</span>
         </div>
         <div class="output-card space-y-3 text-sm text-gray-800">
@@ -1520,7 +1576,7 @@
       <!-- Output Section (hidden initially) -->
       <div id="standupOutputSection" class="hidden space-y-2">
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-medium text-gray-700">Summary</h3>
+          <h3 class="text-sm font-medium text-gray-700 mt-3">Summary</h3>
           <span id="standupCopiedNotice" class="text-xs text-green-600 opacity-0 transition-opacity">✓ Copied!</span>
         </div>
         <div class="output-card text-sm text-gray-800 whitespace-pre-wrap" id="standupOutputText"></div>
@@ -1566,7 +1622,7 @@
       <!-- Output Section (hidden initially) -->
       <div id="promptEnhancerOutputSection" class="hidden space-y-2">
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-medium text-gray-700">Enhanced Prompt</h3>
+          <h3 class="text-sm font-medium text-gray-700 mt-3">Enhanced Prompt</h3>
           <span id="promptEnhancerCopiedNotice" class="text-xs text-green-600 opacity-0 transition-opacity">✓ Copied!</span>
         </div>
         <div class="output-card text-sm text-gray-800 whitespace-pre-wrap" id="promptEnhancerOutputText"></div>
@@ -1587,7 +1643,7 @@
       </div>
       
       <button id="clearHistoryBtn" class="hidden w-full mt-3 py-3 text-sm font-medium text-red-600 bg-red-50 hover:text-red-700 border border-red-200 rounded-lg transition-all cursor-pointer">
-        Clear All History
+        Clear History
       </button>
     </div>
 
