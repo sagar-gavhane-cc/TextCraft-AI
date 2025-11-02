@@ -11,7 +11,14 @@ export const ToneOfVoice = {
   PROFESSIONAL: 'professional',
   CASUAL: 'casual',
   FRIENDLY: 'friendly',
-  DIRECT: 'direct'
+  DIRECT: 'direct',
+  DIPLOMATIC: 'diplomatic',
+  EXCITING: 'exciting',
+  CONFIDENT: 'confident',
+  COMPASSIONATE: 'compassionate',
+  CONSTRUCTIVE: 'constructive',
+  COOPERATIVE: 'cooperative',
+  EMPATHETIC: 'empathetic'
 };
 
 export const AIProvider = {
