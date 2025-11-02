@@ -21,6 +21,12 @@ export const AIProvider = {
   OLLAMA: 'ollama'
 };
 
+export const TAB_TYPES = {
+  REPHRASER: 'rephraser',
+  JIRA: 'jira',
+  STANDUP: 'standup'
+};
+
 export const DEFAULTS = {
   mode: RephrasingMode.IMPROVE,
   tone: ToneOfVoice.PROFESSIONAL,
@@ -43,6 +49,7 @@ export const STORAGE_KEYS = {
 /**
  * @typedef {Object} HistoryEntry
  * @property {string} id
+ * @property {string} type - Type of entry ('rephraser', 'jira', 'standup')
  * @property {string} originalText
  * @property {string} rephrasedText
  * @property {string} mode

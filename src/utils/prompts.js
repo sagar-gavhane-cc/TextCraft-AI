@@ -77,3 +77,86 @@ function getToneInstructions(tone) {
       return 'Use a professional, business-appropriate tone.';
   }
 }
+
+/**
+ * Builds a prompt for generating a Jira ticket from user description
+ * @param {string} description - User's description of the issue or feature
+ * @returns {string} - Complete prompt for the AI model
+ */
+export function buildJiraTicketPrompt(description) {
+  return `
+TASK: Generate a Jira ticket based on the following description.
+
+DESCRIPTION:
+"""
+${description}
+"""
+
+INSTRUCTIONS:
+- Analyze the description and determine the most appropriate ticket type (Bug, Story, Task, Epic, etc.)
+- Create a clear, concise title (50-80 characters recommended)
+- Write a comprehensive description that includes:
+  * Clear problem statement or feature request
+  * Steps to reproduce (if applicable)
+  * Expected vs actual behavior (if applicable)
+  * Acceptance criteria (if applicable)
+  * Any relevant context or technical details
+
+OUTPUT FORMAT:
+Return your response in the following JSON format:
+{
+  "type": "Bug|Story|Task|Epic|etc",
+  "title": "Clear and concise ticket title",
+  "description": "Detailed description with proper formatting"
+}
+
+IMPORTANT:
+- Return ONLY valid JSON, no additional text before or after
+- Ensure the JSON is properly formatted and parseable
+- Use proper Jira formatting conventions in the description
+- Make the title actionable and specific
+`.trim();
+}
+
+/**
+ * Builds a prompt for generating a professional daily standup summary
+ * @param {string} notes - User's standup notes and updates
+ * @returns {string} - Complete prompt for the AI model
+ */
+export function buildStandupPrompt(notes) {
+  return `
+TASK: Create a professional daily standup summary suitable for sharing with stakeholders.
+
+STANDUP NOTES:
+"""
+${notes}
+"""
+
+INSTRUCTIONS:
+Transform the provided notes into a well-structured, professional standup summary that includes:
+
+1. SUMMARY: A concise overview of completed work and progress
+2. ACTION ITEMS: Clear, actionable items for teammates with owners where applicable
+3. BLOCKERS/DEPENDENCIES: Any impediments or dependencies that need attention
+
+FORMATTING GUIDELINES:
+- Use clear section headers
+- Bullet points for action items
+- Professional, concise language
+- Focus on outcomes and impact
+- Make action items specific and time-bound when possible
+
+OUTPUT FORMAT:
+Return a formatted text summary with clear sections. Use markdown-style formatting:
+- Use ## for section headers
+- Use bullet points (-) for action items
+- Keep the tone professional and stakeholder-friendly
+- Do not include any meta-commentary or explanations
+
+IMPORTANT:
+- Return ONLY the formatted summary text
+- Maintain professional tone throughout
+- Ensure action items are clear and assignable
+- Keep the summary concise but comprehensive
+`.trim();
+}

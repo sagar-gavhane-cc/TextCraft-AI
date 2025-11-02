@@ -59,6 +59,45 @@ export class OllamaProvider {
       throw error;
     }
   }
+  
+  /**
+   * Generate text using Ollama with a custom prompt
+   * @param {string} prompt - Custom prompt
+   * @returns {Promise<string>} - Generated text
+   */
+  async generate(prompt) {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        body: JSON.stringify({
+          model: this.model,
+          prompt: prompt,
+          stream: false,
+          options: {
+            temperature: 0.7,
+            num_predict: 2000
+          }
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Ollama error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.response.trim();
+    } catch (error) {
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        throw new Error('Cannot connect to Ollama. Make sure Ollama is running locally and accessible.');
+      }
+      throw error;
+    }
+  }
 
   /**
    * Check if Ollama is available

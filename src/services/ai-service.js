@@ -3,6 +3,7 @@ import { GeminiProvider } from './providers/gemini.js';
 import { GroqProvider } from './providers/groq.js';
 import { OllamaProvider } from './providers/ollama.js';
 import { AIProvider, DEFAULTS } from '../config.js';
+import { buildJiraTicketPrompt, buildStandupPrompt } from '../utils/prompts.js';
 
 /**
  * Main AI service for orchestrating different providers
@@ -202,5 +203,169 @@ export class AIService {
     }
     
     return 'An error occurred. Please try again.';
+  }
+  
+  /**
+   * Generate a Jira ticket from description
+   * @param {Object} request - Jira ticket request
+   * @param {string} request.description - Description of the issue/feature
+   * @param {string} request.provider - Provider to use
+   * @returns {Promise<Object>} - Jira ticket object with type, title, description
+   */
+  async generateJiraTicket(request) {
+    const { description, provider } = request;
+    
+    // Initialize provider if not already done
+    if (!this.providers[provider]) {
+      await this.initializeProvider(provider);
+    }
+    
+    if (!this.providers[provider]) {
+      throw new Error(`Provider ${provider} not available`);
+    }
+    
+    try {
+      const prompt = buildJiraTicketPrompt(description);
+      const systemMessage = 'You are a Jira ticket generator. Return only valid JSON without any explanations.';
+      
+      const result = await Promise.race([
+        this.providers[provider].generate(prompt, systemMessage),
+        this.createTimeout()
+      ]);
+      
+      // Parse JSON response
+      try {
+        // Clean up the response - remove markdown code blocks if present
+        let cleanedResult = result.trim();
+        if (cleanedResult.startsWith('```json')) {
+          cleanedResult = cleanedResult.replace(/^```json\n?/, '').replace(/\n?```$/, '');
+        } else if (cleanedResult.startsWith('```')) {
+          cleanedResult = cleanedResult.replace(/^```\n?/, '').replace(/\n?```$/, '');
+        }
+        
+        const parsed = JSON.parse(cleanedResult);
+        return {
+          type: parsed.type || 'Task',
+          title: parsed.title || '',
+          description: parsed.description || ''
+        };
+      } catch (parseError) {
+        // If JSON parsing fails, try to extract information from text
+        console.error('Failed to parse JSON, attempting text extraction:', parseError);
+        return {
+          type: 'Task',
+          title: description.substring(0, 80),
+          description: result
+        };
+      }
+      
+    } catch (error) {
+      console.error(`Error generating Jira ticket with ${provider}:`, error);
+      
+      // Try fallback to next available provider
+      const fallbackResult = await this.tryFallbackJira(request, provider);
+      if (fallbackResult) {
+        return fallbackResult;
+      }
+      
+      throw new Error(this.getUserFriendlyError(error));
+    }
+  }
+  
+  /**
+   * Generate a standup summary from notes
+   * @param {Object} request - Standup summary request
+   * @param {string} request.notes - Standup notes
+   * @param {string} request.provider - Provider to use
+   * @returns {Promise<string>} - Formatted standup summary
+   */
+  async generateStandupSummary(request) {
+    const { notes, provider } = request;
+    
+    // Initialize provider if not already done
+    if (!this.providers[provider]) {
+      await this.initializeProvider(provider);
+    }
+    
+    if (!this.providers[provider]) {
+      throw new Error(`Provider ${provider} not available`);
+    }
+    
+    try {
+      const prompt = buildStandupPrompt(notes);
+      const systemMessage = 'You are a professional standup summary generator. Return only the formatted summary text without any meta-commentary.';
+      
+      const result = await Promise.race([
+        this.providers[provider].generate(prompt, systemMessage),
+        this.createTimeout()
+      ]);
+      
+      return result;
+      
+    } catch (error) {
+      console.error(`Error generating standup summary with ${provider}:`, error);
+      
+      // Try fallback to next available provider
+      const fallbackResult = await this.tryFallbackStandup(request, provider);
+      if (fallbackResult) {
+        return fallbackResult;
+      }
+      
+      throw new Error(this.getUserFriendlyError(error));
+    }
+  }
+  
+  /**
+   * Try fallback provider for Jira ticket generation
+   * @param {Object} request - Jira ticket request
+   * @param {string} failedProvider - Failed provider name
+   * @returns {Promise<Object|null>} - Jira ticket or null
+   */
+  async tryFallbackJira(request, failedProvider) {
+    const availableProviders = await this.getAvailableProviders();
+    const fallbackProviders = availableProviders.filter(p => p !== failedProvider);
+    
+    if (fallbackProviders.length === 0) {
+      return null;
+    }
+    
+    console.log(`Trying fallback provider for Jira: ${fallbackProviders[0]}`);
+    
+    try {
+      return await this.generateJiraTicket({
+        ...request,
+        provider: fallbackProviders[0]
+      });
+    } catch (error) {
+      console.error('Fallback also failed:', error);
+      return null;
+    }
+  }
+  
+  /**
+   * Try fallback provider for standup summary generation
+   * @param {Object} request - Standup summary request
+   * @param {string} failedProvider - Failed provider name
+   * @returns {Promise<string|null>} - Standup summary or null
+   */
+  async tryFallbackStandup(request, failedProvider) {
+    const availableProviders = await this.getAvailableProviders();
+    const fallbackProviders = availableProviders.filter(p => p !== failedProvider);
+    
+    if (fallbackProviders.length === 0) {
+      return null;
+    }
+    
+    console.log(`Trying fallback provider for standup: ${fallbackProviders[0]}`);
+    
+    try {
+      return await this.generateStandupSummary({
+        ...request,
+        provider: fallbackProviders[0]
+      });
+    } catch (error) {
+      console.error('Fallback also failed:', error);
+      return null;
+    }
   }
 }

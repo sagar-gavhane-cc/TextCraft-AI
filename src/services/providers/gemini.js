@@ -64,4 +64,51 @@ export class GeminiProvider {
     
     return data.candidates[0].content.parts[0].text.trim();
   }
+  
+  /**
+   * Generate text using Gemini with a custom prompt
+   * @param {string} prompt - Custom prompt
+   * @returns {Promise<string>} - Generated text
+   */
+  async generate(prompt) {
+    const response = await fetch(
+      `${this.baseUrl}/models/${this.model}:generateContent?key=${this.apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: prompt }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2000
+          },
+          safetySettings: [
+            {
+              category: 'HARM_CATEGORY_HARASSMENT',
+              threshold: 'BLOCK_NONE'
+            },
+            {
+              category: 'HARM_CATEGORY_HATE_SPEECH',
+              threshold: 'BLOCK_NONE'
+            }
+          ]
+        })
+      }
+    );
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error?.message || `Gemini error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.candidates || data.candidates.length === 0) {
+      throw new Error('No response from Gemini');
+    }
+    
+    return data.candidates[0].content.parts[0].text.trim();
+  }
 }

@@ -125,6 +125,36 @@
     .mt-3 {
       margin-top: 0.75rem;
     }
+
+    .my-1 {
+      margin-top: 0.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .my-2 {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .my-3 {
+      margin-top: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .mx-1 {
+      margin-left: 0.25rem;
+      margin-right: 0.25rem;
+    }
+
+    .mx-2 {
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
+    }
+
+    .mx-3 {
+      margin-left: 0.75rem;
+      margin-right: 0.75rem;
+    }
     
     .mx-auto {
       margin-left: auto;
@@ -437,6 +467,10 @@
     .disabled\:cursor-not-allowed:disabled {
       cursor: not-allowed;
     }
+
+    .whitespace-pre-wrap {
+      white-space: pre-wrap;
+    }
     
     .animate-spin {
       animation: spin 1s linear infinite;
@@ -628,6 +662,44 @@
     .focus\:border-transparent:focus {
       border-color: transparent;
     }
+    
+    /* Tab Navigation Styles */
+    .tab-nav {
+      display: flex;
+      border-bottom: 1px solid #e5e7eb;
+      background-color: white;
+    }
+    
+    .tab-btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #6b7280;
+      background-color: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .tab-btn:hover {
+      color: #374151;
+      background-color: #f9fafb;
+    }
+    
+    .tab-btn.active {
+      color: #2563eb;
+      border-bottom-color: #2563eb;
+    }
+    
+    .tab-panel {
+      display: none;
+    }
+    
+    .tab-panel.active {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -643,64 +715,171 @@
     </button>
   </header>
 
+  <!-- Tab Navigation -->
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="rephraser">Rephraser</button>
+    <button class="tab-btn" data-tab="jira">Jira Ticket</button>
+    <button class="tab-btn" data-tab="standup">Daily Standup</button>
+  </div>
+
   <!-- Main Content -->
   <main class="p-4 space-y-4">
     
-    <!-- Input Section -->
-    <div class="space-y-2">
-      <div class="relative">
-        <textarea 
-          id="inputText" 
-          placeholder="Enter text to rephrase..."
-          class="w-full h-32 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          maxlength="2000"
-        ></textarea>
-        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-          <span id="charCount">0</span>/2000
+    <!-- Rephraser Tab Panel -->
+    <div id="tab-rephraser" class="tab-panel active">
+      <!-- Input Section -->
+      <div class="space-y-2">
+        <div class="relative">
+          <textarea 
+            id="inputText" 
+            placeholder="Enter text to rephrase..."
+            class="w-full h-32 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            maxlength="2000"
+          ></textarea>
+          <div class="absolute bottom-2 right-2 text-xs text-gray-500">
+            <span id="charCount">0</span>/2000
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode Selection -->
+      <div class="grid grid-cols-4 gap-2 my-2">
+        <button class="mode-btn active" data-mode="improve">Improve</button>
+        <button class="mode-btn" data-mode="simplify">Simplify</button>
+        <button class="mode-btn" data-mode="detail">Detail</button>
+        <button class="mode-btn" data-mode="shorten">Shorten</button>
+      </div>
+
+      <!-- Tone & Provider Row -->
+      <div class="flex gap-2 my-2">
+        <select id="toneSelect" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer hover:border-gray-400">
+          <option value="professional">Professional</option>
+          <option value="casual">Casual</option>
+          <option value="friendly">Friendly</option>
+          <option value="direct">Direct</option>
+        </select>
+        
+        <select id="providerSelect" class="flex-1 px-3 py-2 my-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer hover:border-gray-400">
+          <!-- Populated dynamically based on available API keys -->
+        </select>
+      </div>
+
+      <!-- Rephrase Button -->
+      <button 
+        id="rephraseBtn" 
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 my-2 border-none cursor-pointer rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+      >
+        Rephrase
+      </button>
+
+      <!-- Output Section (hidden initially) -->
+      <div id="outputSection" class="hidden space-y-2">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-medium text-gray-700">Result</h3>
+          <span id="copiedNotice" class="text-xs text-green-600 opacity-0 transition-opacity">✓ Copied!</span>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-3 text-sm text-gray-800" id="outputText"></div>
+      </div>
+    </div>
+
+    <!-- Jira Ticket Tab Panel -->
+    <div id="tab-jira" class="tab-panel">
+      <!-- Input Section -->
+      <div class="space-y-2">
+        <div class="relative">
+          <textarea 
+            id="jiraInputText" 
+            placeholder="Describe the issue or feature request..."
+            class="w-full h-32 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            maxlength="2000"
+          ></textarea>
+          <div class="absolute bottom-2 right-2 text-xs text-gray-500">
+            <span id="jiraCharCount">0</span>/2000
+          </div>
+        </div>
+      </div>
+
+      <!-- Provider Row -->
+      <div class="flex gap-2">
+        <select id="jiraProviderSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer hover:border-gray-400">
+          <!-- Populated dynamically based on available API keys -->
+        </select>
+      </div>
+
+      <!-- Generate Button -->
+      <button 
+        id="generateJiraBtn" 
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 border-none cursor-pointer rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+      >
+        Generate Ticket
+      </button>
+
+      <!-- Output Section (hidden initially) -->
+      <div id="jiraOutputSection" class="hidden space-y-2">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-medium text-gray-700">Generated Ticket</h3>
+          <span id="jiraCopiedNotice" class="text-xs text-green-600 opacity-0 transition-opacity">✓ Copied!</span>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-3 space-y-3 text-sm text-gray-800">
+          <div>
+            <label class="text-xs font-semibold text-gray-600 uppercase">Type</label>
+            <div id="jiraType" class="mt-1"></div>
+          </div>
+          <div class="my-1">
+            <label class="text-xs font-semibold text-gray-600 uppercase">Title</label>
+            <div id="jiraTitle" class="mt-1"></div>
+          </div>
+          <div class="my-1">
+            <label class="text-xs font-semibold text-gray-600 uppercase">Description</label>
+            <div id="jiraDescription" class="mt-1 whitespace-pre-wrap"></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Mode Selection -->
-    <div class="grid grid-cols-4 gap-2">
-      <button class="mode-btn active" data-mode="improve">Improve</button>
-      <button class="mode-btn" data-mode="simplify">Simplify</button>
-      <button class="mode-btn" data-mode="detail">Detail</button>
-      <button class="mode-btn" data-mode="shorten">Shorten</button>
-    </div>
-
-    <!-- Tone & Provider Row -->
-    <div class="flex gap-2">
-      <select id="toneSelect" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer hover:border-gray-400">
-        <option value="professional">Professional</option>
-        <option value="casual">Casual</option>
-        <option value="friendly">Friendly</option>
-        <option value="direct">Direct</option>
-      </select>
-      
-      <select id="providerSelect" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer hover:border-gray-400">
-        <!-- Populated dynamically based on available API keys -->
-      </select>
-    </div>
-
-    <!-- Rephrase Button -->
-    <button 
-      id="rephraseBtn" 
-      class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 border-none cursor-pointer rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-    >
-      Rephrase
-    </button>
-
-    <!-- Output Section (hidden initially) -->
-    <div id="outputSection" class="hidden space-y-2">
-      <div class="flex items-center justify-between">
-        <h3 class="text-sm font-medium text-gray-700">Result</h3>
-        <span id="copiedNotice" class="text-xs text-green-600 opacity-0 transition-opacity">✓ Copied!</span>
+    <!-- Daily Standup Tab Panel -->
+    <div id="tab-standup" class="tab-panel">
+      <!-- Input Section -->
+      <div class="space-y-2">
+        <div class="relative">
+          <textarea 
+            id="standupInputText" 
+            placeholder="Enter your standup notes, updates, and action items..."
+            class="w-full h-32 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            maxlength="2000"
+          ></textarea>
+          <div class="absolute bottom-2 right-2 text-xs text-gray-500">
+            <span id="standupCharCount">0</span>/2000
+          </div>
+        </div>
       </div>
-      <div class="bg-white border border-gray-200 rounded-lg p-3 text-sm text-gray-800" id="outputText"></div>
+
+      <!-- Provider Row -->
+      <div class="flex gap-2">
+        <select id="standupProviderSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer hover:border-gray-400">
+          <!-- Populated dynamically based on available API keys -->
+        </select>
+      </div>
+
+      <!-- Generate Button -->
+      <button 
+        id="generateStandupBtn" 
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 border-none cursor-pointer rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+      >
+        Generate Summary
+      </button>
+
+      <!-- Output Section (hidden initially) -->
+      <div id="standupOutputSection" class="hidden space-y-2">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-medium text-gray-700">Summary</h3>
+          <span id="standupCopiedNotice" class="text-xs text-green-600 opacity-0 transition-opacity">✓ Copied!</span>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-3 text-sm text-gray-800 whitespace-pre-wrap" id="standupOutputText"></div>
+      </div>
     </div>
 
-    <!-- History Section -->
+    <!-- History Section (shared across all tabs) -->
     <div class="border-t border-gray-200 pt-4">
       <button id="historyToggle" class="w-full flex items-center justify-between text-sm font-medium text-gray-700 hover:text-gray-900 py-2 px-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
         <span>History (<span id="historyCount">0</span>)</span>
@@ -769,7 +948,7 @@
   <div id="loadingOverlay" class="hidden fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-40">
     <div class="text-center">
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-      <p class="text-sm text-gray-600 mt-2">Rephrasing...</p>
+      <p id="loadingText" class="text-sm text-gray-600 mt-2">Processing...</p>
     </div>
   </div>
 
