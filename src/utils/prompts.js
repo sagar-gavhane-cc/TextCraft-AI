@@ -130,7 +130,7 @@ export function buildStandupPrompt(notes) {
   return `
 TASK: Create a professional daily standup summary suitable for sharing with stakeholders.
 
-Standup Date: ${new Date().toLocaleDateString()}
+Standup Date: ${new Date().toISOString()}
 Standup Notes:
 """
 ${notes}
@@ -159,7 +159,7 @@ Return a formatted text summary suitable for Slack. Use Slack-friendly formattin
 - Use simple formatting like colons, dashes, and line breaks for structure
 - Keep the tone professional and stakeholder-friendly
 - Do not include any meta-commentary or explanations
-- Please include the date of the standup in the summary
+- Please include the date of the standup in the summary in the human readable format (e.g. "Monday, October 28, 2025")
 
 IMPORTANT:
 - Return ONLY the formatted summary text
