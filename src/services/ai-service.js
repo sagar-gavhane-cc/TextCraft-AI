@@ -3,7 +3,7 @@ import { GeminiProvider } from './providers/gemini.js';
 import { GroqProvider } from './providers/groq.js';
 import { OllamaProvider } from './providers/ollama.js';
 import { AIProvider, DEFAULTS } from '../config.js';
-import { buildJiraTicketPrompt, buildStandupPrompt } from '../utils/prompts.js';
+import { buildJiraTicketPrompt, buildStandupPrompt, buildPromptEnhancementPrompt } from '../utils/prompts.js';
 
 /**
  * Main AI service for orchestrating different providers
@@ -368,6 +368,77 @@ export class AIService {
     
     try {
       return await this.generateStandupSummary({
+        ...request,
+        provider: fallbackProviders[0]
+      });
+    } catch (error) {
+      console.error('Fallback also failed:', error);
+      return null;
+    }
+  }
+  
+  /**
+   * Enhance a prompt using the specified provider
+   * @param {Object} request - Prompt enhancement request
+   * @param {string} request.promptText - Original prompt text to enhance
+   * @param {string} request.provider - Provider to use
+   * @param {string} request.model - Model name (optional)
+   * @returns {Promise<string>} - Enhanced prompt text
+   */
+  async enhancePrompt(request) {
+    const { promptText, provider, model } = request;
+    
+    // Initialize provider if not already done or if model changed
+    if (!this.providers[provider] || (model && this.providers[provider].model !== model)) {
+      await this.initializeProvider(provider, model);
+    }
+    
+    if (!this.providers[provider]) {
+      throw new Error(`Provider ${provider} not available`);
+    }
+    
+    try {
+      const prompt = buildPromptEnhancementPrompt(promptText);
+      const systemMessage = 'You are a professional prompt engineer. Return only the enhanced prompt without any explanations or metadata.';
+      
+      const result = await Promise.race([
+        this.providers[provider].generate(prompt, systemMessage),
+        this.createTimeout()
+      ]);
+      
+      return result;
+      
+    } catch (error) {
+      console.error(`Error enhancing prompt with ${provider}:`, error);
+      
+      // Try fallback to next available provider
+      const fallbackResult = await this.tryFallbackPromptEnhancement(request, provider);
+      if (fallbackResult) {
+        return fallbackResult;
+      }
+      
+      throw new Error(this.getUserFriendlyError(error));
+    }
+  }
+  
+  /**
+   * Try fallback provider for prompt enhancement
+   * @param {Object} request - Prompt enhancement request
+   * @param {string} failedProvider - Failed provider name
+   * @returns {Promise<string|null>} - Enhanced prompt or null
+   */
+  async tryFallbackPromptEnhancement(request, failedProvider) {
+    const availableProviders = await this.getAvailableProviders();
+    const fallbackProviders = availableProviders.filter(p => p !== failedProvider);
+    
+    if (fallbackProviders.length === 0) {
+      return null;
+    }
+    
+    console.log(`Trying fallback provider for prompt enhancement: ${fallbackProviders[0]}`);
+    
+    try {
+      return await this.enhancePrompt({
         ...request,
         provider: fallbackProviders[0]
       });

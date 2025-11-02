@@ -1348,6 +1348,7 @@
     <button class="tab-btn active" data-tab="rephraser">Rephraser</button>
     <button class="tab-btn" data-tab="jira">Jira Ticket</button>
     <button class="tab-btn" data-tab="standup">Daily Standup</button>
+    <button class="tab-btn" data-tab="prompt-enhancer">Prompt Enhancer</button>
   </div>
 
   <!-- Main Content -->
@@ -1516,6 +1517,52 @@
           <span id="standupCopiedNotice" class="text-xs text-green-600 opacity-0 transition-opacity">✓ Copied!</span>
         </div>
         <div class="output-card text-sm text-gray-800 whitespace-pre-wrap" id="standupOutputText"></div>
+      </div>
+    </div>
+
+    <!-- Prompt Enhancer Tab Panel -->
+    <div id="tab-prompt-enhancer" class="tab-panel">
+      <!-- Input Section -->
+      <div class="space-y-2">
+        <div class="relative">
+          <textarea 
+            id="promptEnhancerInputText" 
+            placeholder="Enter your prompt to enhance..."
+            class="w-full h-32 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            maxlength="2000"
+          ></textarea>
+          <div class="absolute bottom-2 right-2 text-xs text-gray-500 char-counter">
+            <span id="promptEnhancerCharCount">0</span>/2000
+          </div>
+        </div>
+      </div>
+
+      <!-- Provider Row -->
+      <div class="flex gap-2 mt-3">
+        <select id="promptEnhancerProviderSelect" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer hover:border-gray-400">
+          <!-- Populated dynamically based on available API keys -->
+        </select>
+        
+        <select id="promptEnhancerModelSelect" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer hover:border-gray-400">
+          <!-- Populated dynamically based on selected provider -->
+        </select>
+      </div>
+
+      <!-- Enhance Button -->
+      <button 
+        id="enhancePromptBtn" 
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 mt-3 border-none cursor-pointer rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+      >
+        Enhance Prompt
+      </button>
+
+      <!-- Output Section (hidden initially) -->
+      <div id="promptEnhancerOutputSection" class="hidden space-y-2">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-medium text-gray-700">Enhanced Prompt</h3>
+          <span id="promptEnhancerCopiedNotice" class="text-xs text-green-600 opacity-0 transition-opacity">✓ Copied!</span>
+        </div>
+        <div class="output-card text-sm text-gray-800 whitespace-pre-wrap" id="promptEnhancerOutputText"></div>
       </div>
     </div>
 

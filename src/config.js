@@ -24,7 +24,8 @@ export const AIProvider = {
 export const TAB_TYPES = {
   REPHRASER: 'rephraser',
   JIRA: 'jira',
-  STANDUP: 'standup'
+  STANDUP: 'standup',
+  PROMPT_ENHANCER: 'prompt-enhancer'
 };
 
 export const DEFAULTS = {
@@ -56,7 +57,7 @@ export const STORAGE_KEYS = {
 /**
  * @typedef {Object} HistoryEntry
  * @property {string} id
- * @property {string} type - Type of entry ('rephraser', 'jira', 'standup')
+ * @property {string} type - Type of entry ('rephraser', 'jira', 'standup', 'prompt-enhancer')
  * @property {string} originalText
  * @property {string} rephrasedText
  * @property {string} mode

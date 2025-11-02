@@ -61,6 +61,16 @@ class RephraseApp {
       standupOutputText: document.getElementById('standupOutputText'),
       standupCopiedNotice: document.getElementById('standupCopiedNotice'),
       
+      // Prompt Enhancer tab
+      promptEnhancerInputText: document.getElementById('promptEnhancerInputText'),
+      promptEnhancerCharCount: document.getElementById('promptEnhancerCharCount'),
+      promptEnhancerProviderSelect: document.getElementById('promptEnhancerProviderSelect'),
+      promptEnhancerModelSelect: document.getElementById('promptEnhancerModelSelect'),
+      enhancePromptBtn: document.getElementById('enhancePromptBtn'),
+      promptEnhancerOutputSection: document.getElementById('promptEnhancerOutputSection'),
+      promptEnhancerOutputText: document.getElementById('promptEnhancerOutputText'),
+      promptEnhancerCopiedNotice: document.getElementById('promptEnhancerCopiedNotice'),
+      
       // Shared elements
       historyToggle: document.getElementById('historyToggle'),
       historyContent: document.getElementById('historyContent'),
@@ -128,6 +138,9 @@ class RephraseApp {
       case TAB_TYPES.STANDUP:
         this.elements.standupInputText?.focus();
         break;
+      case TAB_TYPES.PROMPT_ENHANCER:
+        this.elements.promptEnhancerInputText?.focus();
+        break;
     }
   }
   
@@ -173,15 +186,18 @@ class RephraseApp {
     this.elements.providerSelect.innerHTML = '';
     this.elements.jiraProviderSelect.innerHTML = '';
     this.elements.standupProviderSelect.innerHTML = '';
+    this.elements.promptEnhancerProviderSelect.innerHTML = '';
     
     if (availableProviders.length === 0) {
       const emptyOption = '<option value="">No API configured</option>';
       this.elements.providerSelect.innerHTML = emptyOption;
       this.elements.jiraProviderSelect.innerHTML = emptyOption;
       this.elements.standupProviderSelect.innerHTML = emptyOption;
+      this.elements.promptEnhancerProviderSelect.innerHTML = emptyOption;
       this.elements.rephraseBtn.disabled = true;
       this.elements.generateJiraBtn.disabled = true;
       this.elements.generateStandupBtn.disabled = true;
+      this.elements.enhancePromptBtn.disabled = true;
       return;
     }
     
@@ -192,6 +208,7 @@ class RephraseApp {
       this.elements.providerSelect.appendChild(option.cloneNode(true));
       this.elements.jiraProviderSelect.appendChild(option.cloneNode(true));
       this.elements.standupProviderSelect.appendChild(option.cloneNode(true));
+      this.elements.promptEnhancerProviderSelect.appendChild(option.cloneNode(true));
     });
     
     // Set last used provider or first available
@@ -203,6 +220,7 @@ class RephraseApp {
     this.elements.providerSelect.value = selectedProvider;
     this.elements.jiraProviderSelect.value = selectedProvider;
     this.elements.standupProviderSelect.value = selectedProvider;
+    this.elements.promptEnhancerProviderSelect.value = selectedProvider;
     
     this.currentProvider = selectedProvider;
     
@@ -214,6 +232,7 @@ class RephraseApp {
       this.elements.modelSelect.disabled = true;
       this.elements.jiraModelSelect.disabled = true;
       this.elements.standupModelSelect.disabled = true;
+      this.elements.promptEnhancerModelSelect.disabled = true;
     }
   }
   
@@ -232,7 +251,8 @@ class RephraseApp {
     const modelSelects = [
       this.elements.modelSelect,
       this.elements.jiraModelSelect,
-      this.elements.standupModelSelect
+      this.elements.standupModelSelect,
+      this.elements.promptEnhancerModelSelect
     ];
     
     // Clear all model dropdowns
@@ -320,6 +340,9 @@ class RephraseApp {
     // Standup tab
     this.setupStandupListeners();
     
+    // Prompt Enhancer tab
+    this.setupPromptEnhancerListeners();
+    
     // Shared listeners
     this.setupSharedListeners();
   }
@@ -356,12 +379,14 @@ class RephraseApp {
       this.elements.providerSelect.value = activeProvider;
       this.elements.jiraProviderSelect.value = activeProvider;
       this.elements.standupProviderSelect.value = activeProvider;
+      this.elements.promptEnhancerProviderSelect.value = activeProvider;
       this.currentProvider = activeProvider;
     }
     if (activeModel) {
       this.elements.modelSelect.value = activeModel;
       this.elements.jiraModelSelect.value = activeModel;
       this.elements.standupModelSelect.value = activeModel;
+      this.elements.promptEnhancerModelSelect.value = activeModel;
       this.currentModel = activeModel;
     }
     
@@ -399,6 +424,7 @@ class RephraseApp {
       this.currentProvider = e.target.value;
       this.elements.jiraProviderSelect.value = e.target.value;
       this.elements.standupProviderSelect.value = e.target.value;
+      this.elements.promptEnhancerProviderSelect.value = e.target.value;
       this.saveProviderSelection();
       
       // Update model dropdown when provider changes
@@ -408,6 +434,7 @@ class RephraseApp {
         this.elements.modelSelect.disabled = true;
         this.elements.jiraModelSelect.disabled = true;
         this.elements.standupModelSelect.disabled = true;
+        this.elements.promptEnhancerModelSelect.disabled = true;
       }
     });
     
@@ -416,6 +443,7 @@ class RephraseApp {
       this.currentModel = e.target.value;
       this.elements.jiraModelSelect.value = e.target.value;
       this.elements.standupModelSelect.value = e.target.value;
+      this.elements.promptEnhancerModelSelect.value = e.target.value;
       this.saveModelSelection();
     });
     
@@ -448,6 +476,7 @@ class RephraseApp {
       this.currentProvider = e.target.value;
       this.elements.providerSelect.value = e.target.value;
       this.elements.standupProviderSelect.value = e.target.value;
+      this.elements.promptEnhancerProviderSelect.value = e.target.value;
       this.saveProviderSelection();
       
       // Update model dropdown when provider changes
@@ -457,6 +486,7 @@ class RephraseApp {
         this.elements.modelSelect.disabled = true;
         this.elements.jiraModelSelect.disabled = true;
         this.elements.standupModelSelect.disabled = true;
+        this.elements.promptEnhancerModelSelect.disabled = true;
       }
     });
     
@@ -465,6 +495,7 @@ class RephraseApp {
       this.currentModel = e.target.value;
       this.elements.modelSelect.value = e.target.value;
       this.elements.standupModelSelect.value = e.target.value;
+      this.elements.promptEnhancerModelSelect.value = e.target.value;
       this.saveModelSelection();
     });
     
@@ -497,6 +528,7 @@ class RephraseApp {
       this.currentProvider = e.target.value;
       this.elements.providerSelect.value = e.target.value;
       this.elements.jiraProviderSelect.value = e.target.value;
+      this.elements.promptEnhancerProviderSelect.value = e.target.value;
       this.saveProviderSelection();
       
       // Update model dropdown when provider changes
@@ -506,6 +538,7 @@ class RephraseApp {
         this.elements.modelSelect.disabled = true;
         this.elements.jiraModelSelect.disabled = true;
         this.elements.standupModelSelect.disabled = true;
+        this.elements.promptEnhancerModelSelect.disabled = true;
       }
     });
     
@@ -514,6 +547,7 @@ class RephraseApp {
       this.currentModel = e.target.value;
       this.elements.modelSelect.value = e.target.value;
       this.elements.jiraModelSelect.value = e.target.value;
+      this.elements.promptEnhancerModelSelect.value = e.target.value;
       this.saveModelSelection();
     });
     
@@ -522,11 +556,63 @@ class RephraseApp {
       this.handleGenerateStandup();
     });
     
-    // Enter key to generate (Ctrl/Cmd + Enter)
-    this.elements.standupInputText.addEventListener('keydown', (e) => {
+      // Enter key to generate (Ctrl/Cmd + Enter)
+      this.elements.standupInputText.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          this.handleGenerateStandup();
+        }
+      });
+    }
+  
+  /**
+   * Setup event listeners for Prompt Enhancer tab
+   */
+  setupPromptEnhancerListeners() {
+    // Input text area
+    this.elements.promptEnhancerInputText.addEventListener('input', () => {
+      this.updateCharCount(this.elements.promptEnhancerInputText, this.elements.promptEnhancerCharCount);
+      this.validateInput(this.elements.promptEnhancerInputText);
+    });
+    
+    // Provider select
+    this.elements.promptEnhancerProviderSelect.addEventListener('change', async (e) => {
+      this.currentProvider = e.target.value;
+      this.elements.providerSelect.value = e.target.value;
+      this.elements.jiraProviderSelect.value = e.target.value;
+      this.elements.standupProviderSelect.value = e.target.value;
+      this.saveProviderSelection();
+      
+      // Update model dropdown when provider changes
+      if (this.currentProvider) {
+        await this.updateModelDropdown(this.currentProvider);
+      } else {
+        this.elements.modelSelect.disabled = true;
+        this.elements.jiraModelSelect.disabled = true;
+        this.elements.standupModelSelect.disabled = true;
+        this.elements.promptEnhancerModelSelect.disabled = true;
+      }
+    });
+    
+    // Model select
+    this.elements.promptEnhancerModelSelect.addEventListener('change', (e) => {
+      this.currentModel = e.target.value;
+      this.elements.modelSelect.value = e.target.value;
+      this.elements.jiraModelSelect.value = e.target.value;
+      this.elements.standupModelSelect.value = e.target.value;
+      this.saveModelSelection();
+    });
+    
+    // Enhance button
+    this.elements.enhancePromptBtn.addEventListener('click', () => {
+      this.handleEnhancePrompt();
+    });
+    
+    // Enter key to enhance (Ctrl/Cmd + Enter)
+    this.elements.promptEnhancerInputText.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
-        this.handleGenerateStandup();
+        this.handleEnhancePrompt();
       }
     });
   }
@@ -856,8 +942,83 @@ class RephraseApp {
   }
   
   /**
+   * Handle prompt enhancement
+   */
+  async handleEnhancePrompt() {
+    if (this.isProcessing) return;
+    
+    const promptText = this.elements.promptEnhancerInputText.value.trim();
+    
+    if (!this.validateInput(this.elements.promptEnhancerInputText)) {
+      showToast('Please enter a prompt between 10 and 2000 characters', 'error');
+      return;
+    }
+    
+    const provider = this.elements.promptEnhancerProviderSelect.value;
+    if (!provider) {
+      showToast('Please configure an API key in settings', 'error');
+      this.openSettings();
+      return;
+    }
+    
+    this.isProcessing = true;
+    this.showLoading(true, 'Enhancing prompt...');
+    this.elements.enhancePromptBtn.disabled = true;
+    
+    try {
+      const enhancedPrompt = await this.aiService.enhancePrompt({
+        promptText,
+        provider,
+        model: this.currentModel || this.elements.promptEnhancerModelSelect.value
+      });
+      
+      // Display result
+      this.displayPromptEnhancerResult(enhancedPrompt);
+      
+      // Copy to clipboard
+      await this.clipboard.copy(enhancedPrompt);
+      this.showCopiedNotice(TAB_TYPES.PROMPT_ENHANCER);
+      
+      // Save to history
+      this.storage.addHistory({
+        type: TAB_TYPES.PROMPT_ENHANCER,
+        originalText: promptText,
+        rephrasedText: enhancedPrompt,
+        provider: provider
+      });
+      
+      // Refresh history display
+      this.renderHistory();
+      
+      // Save provider selection
+      this.saveProviderSelection();
+      
+    } catch (error) {
+      console.error('Prompt enhancement error:', error);
+      showToast(error.message || 'Failed to enhance prompt', 'error');
+    } finally {
+      this.isProcessing = false;
+      this.showLoading(false);
+      this.elements.enhancePromptBtn.disabled = false;
+    }
+  }
+  
+  /**
+   * Display prompt enhancer result
+   * @param {string} enhancedPrompt - Enhanced prompt text
+   */
+  displayPromptEnhancerResult(enhancedPrompt) {
+    this.elements.promptEnhancerOutputText.textContent = enhancedPrompt;
+    this.elements.promptEnhancerOutputSection.classList.remove('hidden');
+    this.elements.promptEnhancerOutputSection.classList.add('slide-down');
+    
+    // Scroll to output
+    this.elements.promptEnhancerOutputSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  
+  /**
    * Show copied notice
-   * @param {string} tab - Tab type ('rephraser', 'jira', 'standup')
+   * @param {string} tab - Tab type ('rephraser', 'jira', 'standup', 'prompt-enhancer')
    */
   showCopiedNotice(tab = 'rephraser') {
     let noticeElement;
@@ -867,6 +1028,9 @@ class RephraseApp {
         break;
       case TAB_TYPES.STANDUP:
         noticeElement = this.elements.standupCopiedNotice;
+        break;
+      case TAB_TYPES.PROMPT_ENHANCER:
+        noticeElement = this.elements.promptEnhancerCopiedNotice;
         break;
       default:
         noticeElement = this.elements.copiedNotice;
@@ -892,19 +1056,6 @@ class RephraseApp {
     
     // Scroll to output
     this.elements.outputSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-  
-  /**
-   * Show copied notice
-   */
-  showCopiedNotice() {
-    this.elements.copiedNotice.classList.remove('opacity-0');
-    this.elements.copiedNotice.classList.add('opacity-100');
-    
-    setTimeout(() => {
-      this.elements.copiedNotice.classList.remove('opacity-100');
-      this.elements.copiedNotice.classList.add('opacity-0');
-    }, 2000);
   }
   
   /**
@@ -1031,6 +1182,8 @@ class RephraseApp {
         return entry.ticketData?.type || 'Jira';
       case TAB_TYPES.STANDUP:
         return 'Standup';
+      case TAB_TYPES.PROMPT_ENHANCER:
+        return 'Prompt Enhancer';
       default:
         return entry.mode || 'Rephraser';
     }
@@ -1056,6 +1209,8 @@ class RephraseApp {
           return entry.rephrasedText;
         }
       case TAB_TYPES.STANDUP:
+        return entry.rephrasedText;
+      case TAB_TYPES.PROMPT_ENHANCER:
         return entry.rephrasedText;
       default:
         return entry.rephrasedText;
@@ -1119,6 +1274,11 @@ class RephraseApp {
         this.updateCharCount(this.elements.standupInputText, this.elements.standupCharCount);
         setTimeout(() => this.elements.standupInputText.focus(), 200);
         break;
+      case TAB_TYPES.PROMPT_ENHANCER:
+        this.elements.promptEnhancerInputText.value = entry.originalText;
+        this.updateCharCount(this.elements.promptEnhancerInputText, this.elements.promptEnhancerCharCount);
+        setTimeout(() => this.elements.promptEnhancerInputText.focus(), 200);
+        break;
       default:
         // Rephraser tab
         this.elements.inputText.value = entry.originalText;
@@ -1140,6 +1300,7 @@ class RephraseApp {
       this.elements.providerSelect.value = entry.provider;
       this.elements.jiraProviderSelect.value = entry.provider;
       this.elements.standupProviderSelect.value = entry.provider;
+      this.elements.promptEnhancerProviderSelect.value = entry.provider;
     }
     
     // Scroll to top
