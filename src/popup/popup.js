@@ -23,10 +23,6 @@ class RephraseApp {
 
     // DOM elements
     this.elements = {
-      // Tab navigation
-      tabButtons: document.querySelectorAll('.tab-btn'),
-      tabPanels: document.querySelectorAll('.tab-panel'),
-
       // Rephraser tab
       inputText: document.getElementById('inputText'),
       charCount: document.getElementById('charCount'),
@@ -96,20 +92,7 @@ class RephraseApp {
    * Focus input in current tab
    */
   focusCurrentTabInput() {
-    switch (this.currentTab) {
-      case TAB_TYPES.REPHRASER:
-        this.elements.inputText?.focus();
-        break;
-      case TAB_TYPES.JIRA:
-        this.elements.jiraInputText?.focus();
-        break;
-      case TAB_TYPES.STANDUP:
-        this.elements.standupInputText?.focus();
-        break;
-      case TAB_TYPES.PROMPT_ENHANCER:
-        this.elements.promptEnhancerInputText?.focus();
-        break;
-    }
+    this.elements.inputText?.focus();
   }
 
   /**
@@ -270,14 +253,6 @@ class RephraseApp {
    * Setup event listeners
    */
   setupEventListeners() {
-    // Tab switching
-    this.elements.tabButtons.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const tab = e.target.dataset.tab;
-        this.switchTab(tab);
-      });
-    });
-
     // Rephraser tab
     this.setupRephraserListeners();
 
@@ -293,51 +268,6 @@ class RephraseApp {
   }
 
   /**
-   * Switch to a different tab
-   * @param {string} tab - Tab to switch to
-   */
-  switchTab(tab) {
-    this.currentTab = tab;
-
-    // Update tab buttons
-    this.elements.tabButtons.forEach(btn => {
-      if (btn.dataset.tab === tab) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
-    });
-
-    // Update tab panels
-    this.elements.tabPanels.forEach(panel => {
-      if (panel.id === `tab-${tab}`) {
-        panel.classList.add('active');
-      } else {
-        panel.classList.remove('active');
-      }
-    });
-
-    // Sync provider selection across tabs
-    const activeProvider = this.currentProvider || this.elements.providerSelect.value;
-    const activeModel = this.currentModel || this.elements.modelSelect.value;
-    if (activeProvider) {
-      this.elements.providerSelect.value = activeProvider;
-      this.currentProvider = activeProvider;
-    }
-    if (activeModel) {
-      this.elements.modelSelect.value = activeModel;
-      this.currentModel = activeModel;
-    }
-
-    // Refresh history display for the new tab
-    this.renderHistory();
-
-    // Focus input in new tab
-    setTimeout(() => this.focusCurrentTabInput(), 100);
-  }
-
-  /**
-   * Setup event listeners for Rephraser tab
    */
   setupRephraserListeners() {
     // Input text area
@@ -840,9 +770,6 @@ class RephraseApp {
     if (!entry) return;
 
     const type = entry.type || TAB_TYPES.REPHRASER;
-
-    // Switch to appropriate tab
-    this.switchTab(type);
 
     // Set input based on type
     // Rephraser tab
