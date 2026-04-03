@@ -1331,12 +1331,6 @@ export class AIService {
     } catch (error) {
       console.error(`Error with ${provider}:`, error);
       
-      // Try fallback to next available provider
-      const fallbackResult = await this.tryFallback(request, provider);
-      if (fallbackResult) {
-        return fallbackResult;
-      }
-      
       throw new Error(this.getUserFriendlyError(error));
     }
   }
@@ -1369,27 +1363,6 @@ export class AIService {
         const ollamaModel = settings.ollamaModel || DEFAULTS.ollamaModel;
         this.providers[AIProvider.OLLAMA] = new OllamaProvider(ollamaUrl, ollamaModel);
         break;
-    }
-  }
-  
-  async tryFallback(request, failedProvider) {
-    const availableProviders = await this.getAvailableProviders();
-    const fallbackProviders = availableProviders.filter(p => p !== failedProvider);
-    
-    if (fallbackProviders.length === 0) {
-      return null;
-    }
-    
-    console.log(`Trying fallback provider: ${fallbackProviders[0]}`);
-    
-    try {
-      return await this.rephrase({
-        ...request,
-        provider: fallbackProviders[0]
-      });
-    } catch (error) {
-      console.error('Fallback also failed:', error);
-      return null;
     }
   }
   
