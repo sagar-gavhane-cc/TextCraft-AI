@@ -29,10 +29,7 @@ export const AIProvider = {
 };
 
 export const TAB_TYPES = {
-  REPHRASER: 'rephraser',
-  JIRA: 'jira',
-  STANDUP: 'standup',
-  PROMPT_ENHANCER: 'prompt-enhancer'
+  REPHRASER: 'rephraser'
 };
 
 export const DEFAULTS = {
