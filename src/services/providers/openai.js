@@ -1,4 +1,5 @@
 import { buildPrompt } from '../../utils/prompts.js';
+import { getRephraseTemperature } from '../../utils/rephrase-temperature.js';
 
 /**
  * OpenAI provider for text rephrasing
@@ -43,7 +44,7 @@ export class OpenAIProvider {
             content: prompt
           }
         ],
-        temperature: 0.7,
+        temperature: getRephraseTemperature(mode, tone),
         max_tokens: 2000
       })
     });

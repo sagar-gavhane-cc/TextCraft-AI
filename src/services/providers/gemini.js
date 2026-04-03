@@ -1,4 +1,5 @@
 import { buildPrompt } from '../../utils/prompts.js';
+import { getRephraseTemperature } from '../../utils/rephrase-temperature.js';
 
 /**
  * Gemini provider for text rephrasing
@@ -35,7 +36,7 @@ export class GeminiProvider {
             parts: [{ text: prompt }]
           }],
           generationConfig: {
-            temperature: 0.7,
+            temperature: getRephraseTemperature(mode, tone),
             maxOutputTokens: 2000
           },
           safetySettings: [

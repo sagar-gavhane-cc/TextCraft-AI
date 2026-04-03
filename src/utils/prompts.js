@@ -22,15 +22,18 @@ ${text}
 """
 
 IMPORTANT INSTRUCTIONS:
+- Honor MODE and TONE first; prefer simpler wording only when it does not weaken required precision, domain-appropriate terminology, or the chosen tone.
 - Return ONLY the rephrased text without any explanations or meta-commentary
 - Maintain the original meaning and intent
 - Do not add any prefixes like "Rephrased:" or similar
-- Preserve any technical terminology, names, or specific jargon
+- Preserve technical terminology, names, and domain-appropriate jargon when they fit MODE and TONE
 - Ensure the output is grammatically correct and flows naturally
+- Prefer plain, readable phrasing when it aligns with MODE and TONE
 - Format the output for Slack: use plain text, avoid markdown formatting (no **bold**, *italic*, # headers, or code blocks)
 - Use simple formatting like line breaks and basic punctuation for readability
-- Ensure the output is concise and easy to read
-- Avoid using overly complex language or jargon
+- Use US English spelling and conventions for English text
+- Preserve non-English segments as given unless MODE explicitly requires changing them
+- Where MODE mentions length targets, treat them as guides, not strict limits (especially for very short inputs)
 `.trim();
 }
 
@@ -48,10 +51,10 @@ function getModeInstructions(mode) {
       return 'Improve the text by enhancing clarity, flow, and overall quality. Fix awkward phrasing, improve word choice, and ensure professional-level writing quality.';
     
     case 'detail':
-      return 'Add more detail and depth to the text. Expand on key points, provide more context, and make the content more comprehensive while maintaining the original message.';
+      return 'Add more detail and depth to the text. Expand on key points, provide more context, and make the content more comprehensive while maintaining the original message. Expand with at most 2–3 short supporting sentences per main point; do not pad with repetition. Do not invent facts, numbers, dates, or quotes; only elaborate what is already implied or stated in the source.';
     
     case 'shorten':
-      return 'Make the text more concise without losing important information. Remove redundancies, eliminate unnecessary words, and focus on delivering the core message efficiently.';
+      return 'Make the text more concise without losing important information. Remove redundancies, eliminate unnecessary words, and focus on delivering the core message efficiently. Aim for roughly 50–70% of the original length (by characters or words); prioritize keeping meaning and structure proportional to importance.';
     
     default:
       return 'Improve the text by enhancing clarity, flow, and overall quality.';

@@ -1,4 +1,5 @@
 import { buildPrompt } from '../../utils/prompts.js';
+import { getRephraseTemperature } from '../../utils/rephrase-temperature.js';
 
 /**
  * Ollama provider for local text rephrasing
@@ -38,7 +39,7 @@ export class OllamaProvider {
           prompt: prompt,
           stream: false,
           options: {
-            temperature: 0.7,
+            temperature: getRephraseTemperature(mode, tone),
             num_predict: 2000
           }
         })
