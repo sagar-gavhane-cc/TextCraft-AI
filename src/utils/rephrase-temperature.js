@@ -24,5 +24,5 @@ export function getRephraseTemperature(mode, tone) {
   else if (tone === 'friendly') delta += 0.08;
 
   const raw = base + delta;
-  return Math.min(MAX_TEMPERATURE, Math.max(MIN_TEMPERATURE, raw));
+  return +Math.min(MAX_TEMPERATURE, Math.max(MIN_TEMPERATURE, raw)).toFixed(2);
 }
